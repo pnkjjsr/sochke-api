@@ -72,3 +72,4 @@ node_modules/
 # Config Files
 serviceAccountKey.json
 credentials.json
+token.json
