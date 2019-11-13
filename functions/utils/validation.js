@@ -5,7 +5,7 @@ exports.isEmail = (email) => {
 };
 
 exports.isEmpty = (string) => {
-  if (string.trim() === '') return true;
+  if (string.trim() == '') return true;
   else return false;
 };
 
