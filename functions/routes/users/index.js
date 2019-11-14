@@ -119,7 +119,9 @@ exports.respond = (req, res) => {
   let respond = [];
 
   let respondsRef = db.collection("responds");
-  let queryRef = respondsRef.where("uid", "==", data.uid);
+  let queryRef = respondsRef
+    .where("uid", "==", data.uid)
+    .orderBy("createdAt", "desc");
 
   let getDoc = queryRef
     .get()
