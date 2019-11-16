@@ -1,7 +1,5 @@
 const fs = require("fs");
-const readline = require("readline");
 const { google } = require("googleapis");
-require("dotenv").config();
 
 exports.googleSheet = (code, type) => {
   return new Promise((resolve, reject) => {
@@ -57,14 +55,17 @@ exports.googleSheet = (code, type) => {
         scope: SCOPES
       });
 
-      if (!process.env.sheetAuthCode) {
+      let sheetAuthCode =
+        "4/tQHoh_icnapR3Cbc2Y3iF-S0PoUT4F7JZEhlik_vaZGVN3CzXhkk8_dPFsUFkNNM8UUPw22YO0w1dEDZIF6ONIc";
+
+      if (!sheetAuthCode) {
         return console.log(
-          "Authorize this app by visiting this url and update the ENV sheetAuthCode:",
+          "Authorize this app by visiting this url and update the VAR: sheetAuthCode, above this console.log",
           authUrl
         );
       }
 
-      oAuth2Client.getToken(process.env.sheetAuthCode, (err, token) => {
+      oAuth2Client.getToken(sheetAuthCode, (err, token) => {
         if (err)
           return console.error(
             "Error while trying to retrieve access token",
