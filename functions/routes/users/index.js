@@ -148,8 +148,10 @@ exports.addRespond = (req, res) => {
     createdAt: new Date().toISOString(),
     uid: req.body.uid,
     type: req.body.type,
-    respond: req.body.respond
+    respond: req.body.respond,
+    imageUrl: req.body.imageUrl || ""
   };
+
   const { valid, errors } = validateRespond(data);
 
   if (!valid) {
