@@ -57,7 +57,7 @@ app.post("/add-respond", addRespond);
 app.post("/location", updateLocation);
 app.post("/getLocation", getLocation);
 app.post("/user", getUserDetails);
-app.post("/addUserDetails", addUserDetails);
+app.post("/update-user", addUserDetails);
 app.post("/email", sendEmailVerification);
 app.post("/phone", updatePhone);
 app.post("/verifyPhone", verifyPhone);
