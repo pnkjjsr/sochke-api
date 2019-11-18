@@ -1,26 +1,10 @@
-const {
-  isEmail,
-  isEmpty,
-  isBoolean
-} = require('../../utils/validation');
+const { isEmail, isEmpty, isBoolean } = require("../../utils/validation");
 
-exports.validateSignupData = (data) => {
-
+exports.validateRespond = data => {
   let errors = {};
-
-  if (isEmpty(data.email)) {
-    errors.email = 'Email must not be empty';
-  } else if (!isEmail(data.email)) {
-    errors.email = 'Must be a valid email address';
-  }
-
-  if (isEmpty(data.password)) errors.password = 'Password must not be empty';
-
-  if (isEmpty(data.phoneNumber)) errors.phoneNumber = 'Mobile must not be empty';
-
-  if (isEmpty(data.pincode)) errors.pincode = 'Pincode must not be empty';
-
-  if (isEmpty(data.area)) errors.area = 'Area must not be empty';
+  if (isEmpty(data.uid)) errors.uid = "respond is empty";
+  if (isEmpty(data.type)) errors.type = "respond is empty";
+  if (isEmpty(data.respond)) errors.respond = "respond is empty";
 
   return {
     errors,
@@ -28,37 +12,61 @@ exports.validateSignupData = (data) => {
   };
 };
 
-exports.validateLocationData = (data) => {
+exports.validateSignupData = data => {
+  let errors = {};
+
+  if (isEmpty(data.email)) {
+    errors.email = "Email must not be empty";
+  } else if (!isEmail(data.email)) {
+    errors.email = "Must be a valid email address";
+  }
+
+  if (isEmpty(data.password)) errors.password = "Password must not be empty";
+
+  if (isEmpty(data.phoneNumber))
+    errors.phoneNumber = "Mobile must not be empty";
+
+  if (isEmpty(data.pincode)) errors.pincode = "Pincode must not be empty";
+
+  if (isEmpty(data.area)) errors.area = "Area must not be empty";
+
+  return {
+    errors,
+    valid: Object.keys(errors).length === 0 ? true : false
+  };
+};
+
+exports.validateLocationData = data => {
   let errors = {};
 
   if (isEmpty(data.token)) {
     errors.token = {
       code: "token/empty",
-      message: 'Token must not be empty'
-    }
+      message: "Token must not be empty"
+    };
   }
   if (isEmpty(data.address)) {
     errors.address = {
       code: "address/empty",
-      message: 'Address must not be empty'
-    }
+      message: "Address must not be empty"
+    };
   }
   if (isEmpty(data.state)) {
     errors.state = {
       code: "state/empty",
-      message: 'State must not be empty'
+      message: "State must not be empty"
     };
   }
   if (isEmpty(data.pincode)) {
     errors.pincode = {
       code: "pincode/empty",
-      message: 'Pincode must not be empty'
+      message: "Pincode must not be empty"
     };
   }
   if (isEmpty(data.country)) {
     errors.country = {
       code: "country/empty",
-      message: 'Country must not be empty'
+      message: "Country must not be empty"
     };
   }
 
@@ -68,10 +76,10 @@ exports.validateLocationData = (data) => {
   };
 };
 
-exports.validateLoginData = (data) => {
+exports.validateLoginData = data => {
   let errors = {};
 
-  if (isEmpty(data.uid)) errors.email = 'Token is not define.';
+  if (isEmpty(data.uid)) errors.email = "Token is not define.";
 
   return {
     errors,
@@ -79,7 +87,7 @@ exports.validateLoginData = (data) => {
   };
 };
 
-exports.reduceUserDetails = (data) => {
+exports.reduceUserDetails = data => {
   let errors = {};
   if (isEmpty(data.uid)) errors.uid = "Uid is not define.";
   // if (isEmpty(data.photoURL)) errors.photoURL = "Photo url is not define.";
@@ -97,36 +105,36 @@ exports.reduceUserDetails = (data) => {
   };
 };
 
-exports.validateMobileData = (data) => {
+exports.validateMobileData = data => {
   let errors = {};
 
   if (isEmpty(data.token)) {
-    errors.token = 'Token must not be empty';
+    errors.token = "Token must not be empty";
   }
   if (isEmpty(data.phoneNumber)) {
-    errors.phoneNumber = 'Mobile must not be empty';
+    errors.phoneNumber = "Mobile must not be empty";
   }
   if (isEmpty(data.country_code)) {
-    errors.country_code = 'Country Code is not define.';
+    errors.country_code = "Country Code is not define.";
   }
 
   return {
     errors,
     valid: Object.keys(errors).length === 0 ? true : false
   };
-}
-exports.validateOTPData = (data) => {
+};
+exports.validateOTPData = data => {
   let errors = {};
 
   if (isEmpty(data.token)) {
-    errors.token = 'Token not define.';
+    errors.token = "Token not define.";
   }
   if (isBoolean(data.phoneVerified)) {
-    errors.phoneVerified = 'phoneVerified not define.';
+    errors.phoneVerified = "phoneVerified not define.";
   }
 
   return {
     errors,
     valid: Object.keys(errors).length === 0 ? true : false
   };
-}
+};

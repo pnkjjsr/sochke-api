@@ -9,3 +9,4 @@ firebase.json
 .env
 serviceAccountKey.json
 credentials.json
+firebaseConfig.js
