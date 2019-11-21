@@ -1,5 +1,4 @@
 const { admin, db } = require("../../utils/admin");
-
 const config = require("../../firebaseConfig");
 
 const firebase = require("firebase");
@@ -117,6 +116,7 @@ exports.respond = (req, res) => {
     type: req.body.type
   };
   let respond = [];
+  let empty = "";
 
   let respondsRef = db.collection("responds");
   let queryRef = respondsRef
@@ -127,16 +127,21 @@ exports.respond = (req, res) => {
     .get()
     .then(snapshot => {
       if (snapshot.empty) {
-        res.json({
-          message: "No such document!"
-        });
-        return;
+        empty = "No such document!";
       }
       snapshot.forEach(doc => {
         respond.push(doc.data());
       });
     })
-    .then(() => res.json(respond))
+    .then(() => {
+      if (!empty) {
+        return res.json(respond);
+      } else {
+        return res.status(404).json({
+          message: empty
+        });
+      }
+    })
     .catch(err => {
       res.status(404).json(err);
     });
