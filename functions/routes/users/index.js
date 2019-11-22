@@ -52,7 +52,6 @@ exports.signup = (req, res) => {
     phoneVerified: false,
     displayName: "",
     photoURL: "",
-    password: req.body.password,
     area: req.body.area,
     district: req.body.district,
     division: req.body.division,
