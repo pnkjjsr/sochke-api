@@ -17,7 +17,8 @@ const {
   getUserDetails,
   addUserDetails,
   updatePhone,
-  verifyPhone
+  verifyPhone,
+  registeredEmail
 } = require("./routes/users");
 
 // ministers routes
@@ -61,6 +62,7 @@ app.post("/update-user", addUserDetails);
 app.post("/email", sendEmailVerification);
 app.post("/phone", updatePhone);
 app.post("/verifyPhone", verifyPhone);
+app.post("/registered-email", registeredEmail);
 
 // Ministers Routes
 app.post("/councillor", councillor);

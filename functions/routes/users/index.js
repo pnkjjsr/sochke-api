@@ -484,6 +484,29 @@ exports.uploadImage = (req, res) => {
   busboy.end(req.rawBody);
 };
 
+exports.registeredEmail = (req, res) => {
+  let data = {
+    email: req.body.email
+  };
+  let usersRef = db.collection("users");
+  let queryRef = usersRef
+    .where("email", "==", data.email)
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        return res.json({
+          code: "email/not-register",
+          message: "Email ID not registerd."
+        });
+      } else {
+        return res.json({
+          code: "email/register",
+          message: "Email ID registerd."
+        });
+      }
+    });
+};
+
 exports.markNotificationsRead = (req, res) => {
   let batch = db.batch();
   req.body.forEach(notificationId => {
