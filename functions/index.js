@@ -3,8 +3,6 @@ const app = require("express")();
 const main = require("express")();
 const cors = require("cors");
 
-const { db } = require("./utils/admin");
-
 // user routes
 const {
   login,
