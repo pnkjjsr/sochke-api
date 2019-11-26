@@ -7,8 +7,6 @@ const cors = require("cors");
 const {
   login,
   signup,
-  respond,
-  addRespond,
   getLocation,
   updateLocation,
   sendEmailVerification,
@@ -18,6 +16,9 @@ const {
   verifyPhone,
   registeredEmail
 } = require("./routes/users");
+
+// respond routes
+const { respond, addRespond, voteRespond } = require("./routes/responds");
 
 // ministers routes
 const {
@@ -44,15 +45,16 @@ const { electionYears } = require("./routes/elections");
 // Cron Jobs
 const { cronCouncillors, cronMlas, cronMps } = require("./routes/crons");
 
+//** Main Express API setting */
+//** ============================ */
 main.use(cors());
 main.use("/v1", app);
 exports.api = functions.https.onRequest(main);
+//** ============================ */
 
 // User routes
 app.post("/login", login);
 app.post("/signup", signup);
-app.post("/respond", respond);
-app.post("/add-respond", addRespond);
 app.post("/location", updateLocation);
 app.post("/getLocation", getLocation);
 app.post("/user", getUserDetails);
@@ -61,6 +63,11 @@ app.post("/email", sendEmailVerification);
 app.post("/phone", updatePhone);
 app.post("/verifyPhone", verifyPhone);
 app.post("/registered-email", registeredEmail);
+
+// Responds Routes
+app.post("/respond", respond);
+app.post("/add-respond", addRespond);
+app.post("/vote-respond", voteRespond);
 
 // Ministers Routes
 app.post("/councillor", councillor);
