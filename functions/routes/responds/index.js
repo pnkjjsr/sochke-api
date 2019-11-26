@@ -71,16 +71,19 @@ exports.addRespond = (req, res) => {
 // Vote respond
 exports.voteRespond = (req, res) => {
   const { db } = require("../../utils/admin");
-  let voteArr = [];
-  voteArr.push(req.body.uid);
 
   let data = {
+    createdAt: new Date().toISOString(),
     rid: req.body.rid,
-    votedBy: voteArr
+    uid: req.body.uid
   };
 
   let likeRef = db.collection("likes");
-  let queryRef = likeRef.where("rid", "==", data.rid);
+
+  let queryRef = likeRef
+    .where("rid", "==", data.rid)
+    .where("uid", "==", data.uid);
+
   queryRef
     .get()
     .then(snapshot => {
@@ -89,13 +92,59 @@ exports.voteRespond = (req, res) => {
         data.id = newLikeRef.id;
         let setDoc = newLikeRef.set(data).then(ref => {
           return res.json({
+            status: "done",
             message: "Like added successfully"
           });
         });
       }
-      // snapshot.forEach(doc => {
-      //   console.log(doc.id, "=>", doc.data());
-      // });
+
+      snapshot.forEach(doc => {
+        likeRef
+          .doc(doc.id)
+          .delete()
+          .then(() => {
+            return res.json({
+              status: "done",
+              message: "This respond Like removed from this user."
+            });
+          });
+      });
+    })
+    .catch(err => {
+      res.status(404).json(err);
+    });
+};
+
+// Get Vote respond
+exports.getVoteRespond = (req, res) => {
+  const { db } = require("../../utils/admin");
+
+  let data = {
+    rid: req.body.rid,
+    uid: req.body.uid
+  };
+
+  let likeRef = db.collection("likes");
+
+  let queryRef = likeRef
+    .where("rid", "==", data.rid)
+    .where("uid", "==", data.uid);
+
+  queryRef
+    .get()
+    .then(snapshot => {
+      if (!snapshot.empty) {
+        return res.json({
+          code: "vote/added",
+          status: "done",
+          message: "Vote already done on this respond"
+        });
+      }
+
+      return res.json({
+        code: "vote/empty",
+        message: "This respond Like removed from this user."
+      });
     })
     .catch(err => {
       res.status(404).json(err);

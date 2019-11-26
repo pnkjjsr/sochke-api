@@ -18,7 +18,12 @@ const {
 } = require("./routes/users");
 
 // respond routes
-const { respond, addRespond, voteRespond } = require("./routes/responds");
+const {
+  respond,
+  addRespond,
+  voteRespond,
+  getVoteRespond
+} = require("./routes/responds");
 
 // ministers routes
 const {
@@ -68,6 +73,7 @@ app.post("/registered-email", registeredEmail);
 app.post("/respond", respond);
 app.post("/add-respond", addRespond);
 app.post("/vote-respond", voteRespond);
+app.post("/get-vote-respond", getVoteRespond);
 
 // Ministers Routes
 app.post("/councillor", councillor);
