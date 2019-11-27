@@ -1,5 +1,3 @@
-const firebase = require("firebase");
-
 const { validateRespond } = require("./validators");
 
 // Get all respond
@@ -31,7 +29,9 @@ exports.respond = (req, res) => {
       if (!empty) {
         return res.json(respond);
       } else {
-        return res.status(404).json({
+        return res.json({
+          code: "respond/empty",
+          status: "done",
           message: empty
         });
       }
