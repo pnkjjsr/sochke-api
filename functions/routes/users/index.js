@@ -1,8 +1,4 @@
-const { admin, db } = require("../../utils/admin");
-const config = require("../../firebaseConfig");
-
 const firebase = require("firebase");
-firebase.initializeApp(config);
 
 const {
   validateSignupData,
@@ -23,6 +19,7 @@ exports.login = (req, res) => {
 
   if (!valid) return res.status(400).json(errors);
 
+  const { db } = require("../../utils/admin");
   db.doc(`/users/${userData.uid}`)
     .get()
     .then(doc => {
@@ -41,6 +38,7 @@ exports.login = (req, res) => {
 
 // Sign users up
 exports.signup = (req, res) => {
+  const { db } = require("../../utils/admin");
   const newUser = {
     createdAt: new Date().toISOString(),
     uid: req.body.uid,
@@ -52,7 +50,6 @@ exports.signup = (req, res) => {
     phoneVerified: false,
     displayName: "",
     photoURL: "",
-    password: req.body.password,
     area: req.body.area,
     district: req.body.district,
     division: req.body.division,
@@ -68,6 +65,7 @@ exports.signup = (req, res) => {
   }
 
   let userId = newUser.uid;
+
   let usersRef = db.collection("users");
   usersRef
     .where("email", "==", newUser.email)
@@ -111,6 +109,7 @@ exports.signup = (req, res) => {
 
 // Get all respond
 exports.respond = (req, res) => {
+  const { db } = require("../../utils/admin");
   const data = {
     uid: req.body.uid,
     type: req.body.type
@@ -149,6 +148,7 @@ exports.respond = (req, res) => {
 
 // Add respond
 exports.addRespond = (req, res) => {
+  const { db } = require("../../utils/admin");
   const data = {
     createdAt: new Date().toISOString(),
     uid: req.body.uid,
@@ -174,6 +174,7 @@ exports.addRespond = (req, res) => {
 };
 
 exports.getLocation = (req, res) => {
+  const { db } = require("../../utils/admin");
   let uid = req.body.uid;
   let userRef = db.collection("users").doc(uid);
   let getDoc = userRef
@@ -196,6 +197,7 @@ exports.getLocation = (req, res) => {
 };
 
 exports.updateLocation = (req, res) => {
+  const { db } = require("../../utils/admin");
   let token = req.body.token;
   const validationData = {
     token: req.body.token,
@@ -232,6 +234,7 @@ exports.updateLocation = (req, res) => {
 
 // Update Mobile
 exports.updatePhone = (req, res) => {
+  const { db } = require("../../utils/admin");
   const validationData = {
     token: req.body.token,
     country_code: req.body.country_code,
@@ -260,6 +263,7 @@ exports.updatePhone = (req, res) => {
     });
 };
 exports.verifyPhone = (req, res) => {
+  const { db } = require("../../utils/admin");
   const validationData = {
     token: req.body.token,
     phoneVerified: req.body.phoneVerified
@@ -287,6 +291,7 @@ exports.verifyPhone = (req, res) => {
 };
 
 exports.logout = (req, res) => {
+  firebase.initializeApp(config);
   firebase
     .auth()
     .signOut()
@@ -303,6 +308,7 @@ exports.logout = (req, res) => {
 
 // Send Email Verification
 exports.sendEmailVerification = (req, res) => {
+  firebase.initializeApp(config);
   firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
       if (!user.emailVerified) {
@@ -328,6 +334,7 @@ exports.sendEmailVerification = (req, res) => {
 
 // Add user details
 exports.addUserDetails = (req, res) => {
+  const { db } = require("../../utils/admin");
   let data = req.body;
 
   const { valid, errors } = reduceUserDetails(data);
@@ -351,6 +358,7 @@ exports.addUserDetails = (req, res) => {
 };
 // Get any user's details
 exports.getUserDetails = (req, res) => {
+  const { db } = require("../../utils/admin");
   let userData = {
     uid: req.body.uid
   };
@@ -371,6 +379,7 @@ exports.getUserDetails = (req, res) => {
 };
 // Get own user details
 exports.getAuthenticatedUser = (req, res) => {
+  const { db } = require("../../utils/admin");
   let userData = {};
   db.doc(`/users/${req.user.handle}`)
     .get()
@@ -452,6 +461,7 @@ exports.uploadImage = (req, res) => {
     file.pipe(fs.createWriteStream(filepath));
   });
   busboy.on("finish", () => {
+    const { admin } = require("../../utils/admin");
     admin
       .storage()
       .bucket()
@@ -464,6 +474,8 @@ exports.uploadImage = (req, res) => {
         }
       })
       .then(() => {
+        const { db } = require("../../utils/admin");
+        const config = require("../../firebaseConfig");
         const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`;
         return db.doc(`/users/${req.user.handle}`).update({
           imageUrl
@@ -484,7 +496,32 @@ exports.uploadImage = (req, res) => {
   busboy.end(req.rawBody);
 };
 
+exports.registeredEmail = (req, res) => {
+  const { db } = require("../../utils/admin");
+  let data = {
+    email: req.body.email
+  };
+  let usersRef = db.collection("users");
+  let queryRef = usersRef
+    .where("email", "==", data.email)
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        return res.json({
+          code: "email/not-register",
+          message: "Email ID not registerd."
+        });
+      } else {
+        return res.json({
+          code: "email/register",
+          message: "Email ID registerd."
+        });
+      }
+    });
+};
+
 exports.markNotificationsRead = (req, res) => {
+  const { db } = require("../../utils/admin");
   let batch = db.batch();
   req.body.forEach(notificationId => {
     const notification = db.doc(`/notifications/${notificationId}`);
