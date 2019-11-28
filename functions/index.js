@@ -22,7 +22,9 @@ const {
   respond,
   addRespond,
   voteRespond,
-  getVoteRespond
+  getVoteRespond,
+  opinion,
+  addOpinion
 } = require("./routes/responds");
 
 // ministers routes
@@ -74,6 +76,8 @@ app.post("/respond", respond);
 app.post("/add-respond", addRespond);
 app.post("/vote-respond", voteRespond);
 app.post("/get-vote-respond", getVoteRespond);
+app.post("/opinion", opinion);
+app.post("/add-opinion", addOpinion);
 
 // Ministers Routes
 app.post("/councillor", councillor);

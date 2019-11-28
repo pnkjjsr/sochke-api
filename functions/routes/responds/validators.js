@@ -11,3 +11,15 @@ exports.validateRespond = data => {
     valid: Object.keys(errors).length === 0 ? true : false
   };
 };
+
+exports.validateOpinion = data => {
+  let errors = {};
+  if (isEmpty(data.uid)) errors.uid = "User ID is not defined";
+  if (isEmpty(data.rid)) errors.rid = "Respond ID is not defined";
+  if (isEmpty(data.opinion)) errors.opinion = "Opinion is not defined";
+
+  return {
+    errors,
+    valid: Object.keys(errors).length === 0 ? true : false
+  };
+};

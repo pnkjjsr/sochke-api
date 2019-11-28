@@ -1,4 +1,4 @@
-const { validateRespond } = require("./validators");
+const { validateRespond, validateOpinion } = require("./validators");
 
 // Get all respond
 exports.respond = (req, res) => {
@@ -149,4 +149,86 @@ exports.getVoteRespond = (req, res) => {
     .catch(err => {
       res.status(404).json(err);
     });
+};
+
+// Get all opinion
+exports.opinion = async (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    rid: req.body.rid
+  };
+  let opinion = [];
+  let empty = "";
+
+  let opinionRef = db.collection("opinions");
+  let userRef = db.collection("users");
+  let queryRef = opinionRef
+    .where("rid", "==", data.rid)
+    .orderBy("createdAt", "desc");
+
+  let getDoc = await queryRef
+    .get()
+    .then(async snapshot => {
+      if (snapshot.empty) {
+        empty = "No opinion on this respond yet!";
+      }
+      await snapshot.forEach(async doc => {
+        let oData = await doc.data();
+
+        let getDoc = await userRef
+          .doc(oData.uid)
+          .get()
+          .then(async doc => {
+            console.log(1);
+            oData.name = await doc.data().name;
+            oData.photoURL = await doc.data().photoURL;
+            await opinion.push(doc.data());
+          })
+          .catch(err => {
+            res.status(404).json(err);
+          });
+      });
+    })
+    .then(() => {
+      if (!empty) {
+        return res.json(opinion);
+      } else {
+        return res.json({
+          code: "opinion/empty",
+          status: "done",
+          message: empty
+        });
+      }
+    })
+    .catch(err => {
+      res.status(404).json(err);
+    });
+};
+
+// Add Opinion
+exports.addOpinion = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    createdAt: new Date().toISOString(),
+    uid: req.body.uid,
+    rid: req.body.rid,
+    opinion: req.body.opinion
+  };
+
+  const { valid, errors } = validateOpinion(data);
+
+  if (!valid) {
+    return res.status(400).json(errors);
+  }
+
+  let opinionRef = db.collection("opinions");
+  let newOpinionRef = opinionRef.doc();
+  data.id = newOpinionRef.id;
+  let setDoc = newOpinionRef.set(data).then(ref => {
+    res.json({
+      status: "done",
+      code: "opinion/added",
+      message: "Opinion added successfully"
+    });
+  });
 };
