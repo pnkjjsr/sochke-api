@@ -3,6 +3,8 @@ const app = require("express")();
 const main = require("express")();
 const cors = require("cors");
 
+const { test } = require("./routes/tests");
+
 // user routes
 const {
   login,
@@ -58,6 +60,9 @@ main.use(cors());
 main.use("/v1", app);
 exports.api = functions.https.onRequest(main);
 //** ============================ */
+
+// Test
+app.post("/test", test);
 
 // User routes
 app.post("/login", login);

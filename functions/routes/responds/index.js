@@ -152,7 +152,7 @@ exports.getVoteRespond = (req, res) => {
 };
 
 // Get all opinion
-exports.opinion = async (req, res) => {
+exports.opinion = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = {
     rid: req.body.rid
@@ -161,45 +161,47 @@ exports.opinion = async (req, res) => {
   let empty = "";
 
   let opinionRef = db.collection("opinions");
-  let userRef = db.collection("users");
+
   let queryRef = opinionRef
     .where("rid", "==", data.rid)
-    .orderBy("createdAt", "desc");
+    .orderBy("createdAt", "desc")
+    .limit(10);
 
-  let getDoc = await queryRef
+  let getUser = async oData => {
+    let userRef = db.collection("users");
+    await userRef
+      .doc(oData.uid)
+      .get()
+      .then(doc => {
+        oData.name = doc.data().displayName;
+        oData.photoURL = doc.data().photoURL;
+        opinion.push(oData);
+      });
+  };
+
+  queryRef
     .get()
     .then(async snapshot => {
       if (snapshot.empty) {
         empty = "No opinion on this respond yet!";
-      }
-      await snapshot.forEach(async doc => {
-        let oData = await doc.data();
-
-        let getDoc = await userRef
-          .doc(oData.uid)
-          .get()
-          .then(async doc => {
-            console.log(1);
-            oData.name = await doc.data().name;
-            oData.photoURL = await doc.data().photoURL;
-            await opinion.push(doc.data());
-          })
-          .catch(err => {
-            res.status(404).json(err);
-          });
-      });
-    })
-    .then(() => {
-      if (!empty) {
-        return res.json(opinion);
       } else {
-        return res.json({
-          code: "opinion/empty",
-          status: "done",
-          message: empty
+        await snapshot.forEach(async doc => {
+          let oData = doc.data();
+          await getUser(oData);
         });
       }
     })
+    // .then(() => {
+    //   if (!empty) {
+    //     return res.json(opinion);
+    //   } else {
+    //     return res.json({
+    //       code: "opinion/empty",
+    //       status: "done",
+    //       message: empty
+    //     });
+    //   }
+    // })
     .catch(err => {
       res.status(404).json(err);
     });
