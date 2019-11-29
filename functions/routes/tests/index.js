@@ -2,18 +2,18 @@
 exports.test = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = {
+    rid: req.body.rid,
     uid: req.body.uid
   };
 
-  let userRef = db.collection("users").doc(data.uid);
-  userRef
-    .get()
-    .then(doc => {
-      if (doc.exists) {
-        res.json(doc.data());
-      } else {
-        res.json("No such document!");
-      }
-    })
-    .catch();
+  let likesRef = db.collection("likes");
+  let queryRef = likesRef
+    .where("uid", "==", data.uid)
+    .where("rid", "==", "121121212");
+
+  queryRef.get().then(snapshot => {
+    console.log(snapshot.empty);
+
+    // res.json(doc.data());
+  });
 };

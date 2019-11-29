@@ -9,34 +9,59 @@ exports.respond = (req, res) => {
   };
   let respond = [];
   let empty = "";
+  let results = "";
 
   let respondsRef = db.collection("responds");
   let queryRef = respondsRef
     .where("uid", "==", data.uid)
-    .orderBy("createdAt", "desc");
+    .orderBy("createdAt", "desc")
+    .limit(10);
 
-  let getDoc = queryRef
-    .get()
-    .then(snapshot => {
-      if (snapshot.empty) {
-        empty = "No such document!";
-      }
-      snapshot.forEach(doc => {
-        respond.push(doc.data());
+  let getLike = async snapshot => {
+    if (snapshot.empty) {
+      empty = "No such document!";
+    } else {
+      results = snapshot.docs.map(async doc => {
+        let dData = doc.data();
+        let likesRef = db.collection("likes");
+        let queryDoc = likesRef
+          .where("uid", "==", data.uid)
+          .where("rid", "==", dData.id);
+
+        await queryDoc.get().then(doc => {
+          if (doc.empty) {
+            dData.voted = false;
+          } else {
+            dData.voted = true;
+          }
+          respond.push(dData);
+        });
       });
+    }
+  };
+
+  let transact = db
+    .runTransaction(t => {
+      let transRef = t.get(queryRef).then(snapshot => {
+        getLike(snapshot);
+      });
+      return transRef;
     })
     .then(() => {
-      if (!empty) {
-        return res.json(respond);
-      } else {
-        return res.json({
-          code: "respond/empty",
-          status: "done",
-          message: empty
-        });
-      }
+      Promise.all(results).then(() => {
+        if (!empty) {
+          return res.json(respond);
+        } else {
+          return res.json({
+            code: "respond/empty",
+            status: "done",
+            message: empty
+          });
+        }
+      });
     })
     .catch(err => {
+      console.log("Transaction failure:", err);
       res.status(404).json(err);
     });
 };
@@ -159,6 +184,7 @@ exports.opinion = (req, res) => {
   };
   let opinion = [];
   let empty = "";
+  let mapPromise = "";
 
   let opinionRef = db.collection("opinions");
 
@@ -167,41 +193,46 @@ exports.opinion = (req, res) => {
     .orderBy("createdAt", "desc")
     .limit(10);
 
-  let getUser = async oData => {
-    let userRef = db.collection("users");
-    await userRef
-      .doc(oData.uid)
-      .get()
-      .then(doc => {
-        oData.name = doc.data().displayName;
-        oData.photoURL = doc.data().photoURL;
-        opinion.push(oData);
+  let getUser = snapshot => {
+    if (snapshot.empty) {
+      empty = "No opinion on this respond yet!";
+    } else {
+      mapPromise = snapshot.docs.map(async doc => {
+        let oData = doc.data();
+        let userRef = db.collection("users");
+
+        await userRef
+          .doc(oData.uid)
+          .get()
+          .then(doc => {
+            oData.displayName = doc.data().displayName;
+            oData.photoURL = doc.data().photoURL;
+            opinion.push(oData);
+          });
       });
+    }
   };
 
-  queryRef
-    .get()
-    .then(async snapshot => {
-      if (snapshot.empty) {
-        empty = "No opinion on this respond yet!";
-      } else {
-        await snapshot.forEach(async doc => {
-          let oData = doc.data();
-          await getUser(oData);
-        });
-      }
+  let transact = db
+    .runTransaction(t => {
+      let transRef = t.get(queryRef).then(async snapshot => {
+        getUser(snapshot);
+      });
+      return transRef;
     })
-    // .then(() => {
-    //   if (!empty) {
-    //     return res.json(opinion);
-    //   } else {
-    //     return res.json({
-    //       code: "opinion/empty",
-    //       status: "done",
-    //       message: empty
-    //     });
-    //   }
-    // })
+    .then(() => {
+      Promise.all(mapPromise).then(() => {
+        if (!empty) {
+          return res.json(opinion);
+        } else {
+          return res.json({
+            code: "opinion/empty",
+            status: "done",
+            message: empty
+          });
+        }
+      });
+    })
     .catch(err => {
       res.status(404).json(err);
     });
