@@ -17,29 +17,6 @@ exports.respond = (req, res) => {
     .orderBy("createdAt", "desc")
     .limit(10);
 
-  let getLike = async snapshot => {
-    if (snapshot.empty) {
-      empty = "No such document!";
-    } else {
-      results = snapshot.docs.map(async doc => {
-        let dData = doc.data();
-        let likesRef = db.collection("likes");
-        let queryDoc = likesRef
-          .where("uid", "==", data.uid)
-          .where("rid", "==", dData.id);
-
-        await queryDoc.get().then(doc => {
-          if (doc.empty) {
-            dData.voted = false;
-          } else {
-            dData.voted = true;
-          }
-          respond.push(dData);
-        });
-      });
-    }
-  };
-
   let transact = db
     .runTransaction(t => {
       let transRef = t.get(queryRef).then(snapshot => {
@@ -64,6 +41,29 @@ exports.respond = (req, res) => {
       console.log("Transaction failure:", err);
       res.status(404).json(err);
     });
+
+  let getLike = async snapshot => {
+    if (snapshot.empty) {
+      empty = "No such document!";
+    } else {
+      results = snapshot.docs.map(async doc => {
+        let dData = doc.data();
+        let likesRef = db.collection("likes");
+        let queryDoc = likesRef
+          .where("uid", "==", data.uid)
+          .where("rid", "==", dData.id);
+
+        await queryDoc.get().then(doc => {
+          if (doc.empty) {
+            dData.voted = false;
+          } else {
+            dData.voted = true;
+          }
+          respond.push(dData);
+        });
+      });
+    }
+  };
 };
 
 // Add respond
