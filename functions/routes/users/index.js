@@ -7,7 +7,8 @@ const {
   reduceUserDetails,
   validateMobileData,
   validateOTPData,
-  validateRespond
+  validateRespond,
+  validatePassword
 } = require("./validators");
 
 // Log user in
@@ -27,6 +28,7 @@ exports.login = (req, res) => {
         return res.status(400).json(error);
       } else {
         let data = doc.data();
+        delete data.password;
         return res.status(201).json(data);
       }
     })
@@ -45,6 +47,7 @@ exports.signup = (req, res) => {
     userType: req.body.userType,
     email: req.body.email,
     emailVerified: false,
+    password: req.body.password,
     countryCode: "+91",
     phoneNumber: req.body.mobile,
     phoneVerified: false,
@@ -262,6 +265,7 @@ exports.updatePhone = (req, res) => {
       return res.status(400).json(error);
     });
 };
+
 exports.verifyPhone = (req, res) => {
   const { db } = require("../../utils/admin");
   const validationData = {
@@ -286,6 +290,48 @@ exports.verifyPhone = (req, res) => {
       });
     })
     .catch(function(error) {
+      return res.status(400).json(error);
+    });
+};
+
+exports.verifyPassword = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    uid: req.body.uid,
+    password: req.body.password
+  };
+  const { valid, errors } = validatePassword(data);
+  if (!valid) return res.status(400).json(errors);
+
+  let usersRef = db.collection("users");
+  let getDoc = usersRef
+    .doc(data.uid)
+    .get()
+    .then(doc => {
+      if (!doc.exists) {
+        return res.json({
+          code: "user/empty",
+          status: "done",
+          message: "There is no user, Signout the website."
+        });
+      } else {
+        let uData = doc.data();
+        if (data.password == uData.password) {
+          res.json({
+            code: "password/match",
+            status: "done",
+            message: "Password matched successfully"
+          });
+        } else {
+          res.json({
+            code: "password/not-match",
+            status: "done",
+            message: "Current password is not valid."
+          });
+        }
+      }
+    })
+    .catch(error => {
       return res.status(400).json(error);
     });
 };

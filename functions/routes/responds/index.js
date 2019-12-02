@@ -15,7 +15,7 @@ exports.respond = (req, res) => {
   let queryRef = respondsRef
     .where("uid", "==", data.uid)
     .orderBy("createdAt", "desc")
-    .limit(10);
+    .limit(25);
 
   let transact = db
     .runTransaction(t => {
@@ -48,17 +48,29 @@ exports.respond = (req, res) => {
     } else {
       results = snapshot.docs.map(async doc => {
         let dData = doc.data();
+
+        let opinionsCount = db
+          .collection("opinions")
+          .where("rid", "==", dData.id);
+        await opinionsCount.get().then(snapshot => {
+          let count = snapshot.size;
+          dData.opinionCount = count;
+        });
+
+        let likesCount = db.collection("likes").where("rid", "==", dData.id);
+        await likesCount.get().then(snapshot => {
+          let count = snapshot.size;
+          dData.likeCount = count;
+        });
+
         let likesRef = db.collection("likes");
         let queryDoc = likesRef
           .where("uid", "==", data.uid)
           .where("rid", "==", dData.id);
 
         await queryDoc.get().then(doc => {
-          if (doc.empty) {
-            dData.voted = false;
-          } else {
-            dData.voted = true;
-          }
+          if (doc.empty) dData.voted = false;
+          else dData.voted = true;
           respond.push(dData);
         });
       });

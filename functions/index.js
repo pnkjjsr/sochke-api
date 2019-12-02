@@ -16,7 +16,8 @@ const {
   addUserDetails,
   updatePhone,
   verifyPhone,
-  registeredEmail
+  registeredEmail,
+  verifyPassword
 } = require("./routes/users");
 
 // respond routes
@@ -75,6 +76,7 @@ app.post("/email", sendEmailVerification);
 app.post("/phone", updatePhone);
 app.post("/verifyPhone", verifyPhone);
 app.post("/registered-email", registeredEmail);
+app.post("/verify-password", verifyPassword);
 
 // Responds Routes
 app.post("/respond", respond);
