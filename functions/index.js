@@ -3,6 +3,8 @@ const app = require("express")();
 const main = require("express")();
 const cors = require("cors");
 
+const { test } = require("./routes/tests");
+
 // user routes
 const {
   login,
@@ -14,7 +16,8 @@ const {
   addUserDetails,
   updatePhone,
   verifyPhone,
-  registeredEmail
+  registeredEmail,
+  verifyPassword
 } = require("./routes/users");
 
 // respond routes
@@ -22,7 +25,9 @@ const {
   respond,
   addRespond,
   voteRespond,
-  getVoteRespond
+  getVoteRespond,
+  opinion,
+  addOpinion
 } = require("./routes/responds");
 
 // ministers routes
@@ -57,6 +62,9 @@ main.use("/v1", app);
 exports.api = functions.https.onRequest(main);
 //** ============================ */
 
+// Test
+app.post("/test", test);
+
 // User routes
 app.post("/login", login);
 app.post("/signup", signup);
@@ -68,12 +76,15 @@ app.post("/email", sendEmailVerification);
 app.post("/phone", updatePhone);
 app.post("/verifyPhone", verifyPhone);
 app.post("/registered-email", registeredEmail);
+app.post("/verify-password", verifyPassword);
 
 // Responds Routes
 app.post("/respond", respond);
 app.post("/add-respond", addRespond);
 app.post("/vote-respond", voteRespond);
 app.post("/get-vote-respond", getVoteRespond);
+app.post("/opinion", opinion);
+app.post("/add-opinion", addOpinion);
 
 // Ministers Routes
 app.post("/councillor", councillor);

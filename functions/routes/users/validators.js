@@ -21,6 +21,8 @@ exports.validateSignupData = data => {
     errors.email = "Must be a valid email address";
   }
 
+  if (isEmpty(data.password)) errors.password = "Password must not be empty";
+
   if (isEmpty(data.phoneNumber))
     errors.phoneNumber = "Mobile must not be empty";
 
@@ -121,6 +123,7 @@ exports.validateMobileData = data => {
     valid: Object.keys(errors).length === 0 ? true : false
   };
 };
+
 exports.validateOTPData = data => {
   let errors = {};
 
@@ -129,6 +132,23 @@ exports.validateOTPData = data => {
   }
   if (isBoolean(data.phoneVerified)) {
     errors.phoneVerified = "phoneVerified not define.";
+  }
+
+  return {
+    errors,
+    valid: Object.keys(errors).length === 0 ? true : false
+  };
+};
+
+exports.validatePassword = data => {
+  let errors = {};
+
+  if (isEmpty(data.uid)) {
+    errors.uid = "User ID is not define.";
+  }
+
+  if (isEmpty(data.password)) {
+    errors.currentPassword = "Current password is not define.";
   }
 
   return {

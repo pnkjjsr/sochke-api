@@ -6,11 +6,15 @@ process.on("message", type => {
     ministers => {
       let ministerRef = db.collection(type);
       ministers.map(minister => {
+        let winnerBoolen = "";
+        if (minister[2] == "TRUE") winnerBoolen = true;
+        else winnerBoolen = false;
+
         let data = {
           createdAt: new Date().toISOString(),
           name: minister[0],
           constituency: minister[1],
-          winner: minister[2] || "",
+          winner: winnerBoolen || "",
           year: minister[3] || "",
           type: minister[4] || "",
           party: minister[5] || "",
