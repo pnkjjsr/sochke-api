@@ -4,7 +4,7 @@ const {
   validateSignupData,
   validateLocationData,
   validateLoginData,
-  reduceUserDetails,
+  validateUserDetails,
   validateMobileData,
   validateOTPData,
   validateRespond,
@@ -381,9 +381,16 @@ exports.sendEmailVerification = (req, res) => {
 // Add user details
 exports.addUserDetails = (req, res) => {
   const { db } = require("../../utils/admin");
-  let data = req.body;
+  let data = {
+    uid: req.body.uid,
+    displayName: req.body.displayName,
+    bio: req.body.bio,
+    dateOfBirth: req.body.dateOfBirth,
+    phoneNumber: req.body.phoneNumber,
+    gender: req.body.gender
+  };
 
-  const { valid, errors } = reduceUserDetails(data);
+  const { valid, errors } = validateUserDetails(data);
 
   if (!valid) return res.status(400).json(errors);
 
