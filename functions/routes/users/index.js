@@ -383,7 +383,11 @@ exports.addUserDetails = (req, res) => {
   const { db } = require("../../utils/admin");
   let data = {
     uid: req.body.uid,
-    email: req.body.email
+    displayName: req.body.displayName,
+    bio: req.body.bio,
+    dateOfBirth: req.body.dateOfBirth,
+    phoneNumber: req.body.phoneNumber,
+    gender: req.body.gender
   };
 
   const { valid, errors } = validateUserDetails(data);

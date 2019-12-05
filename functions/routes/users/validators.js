@@ -91,8 +91,8 @@ exports.validateUserDetails = data => {
   let errors = {};
   if (isEmpty(data.uid)) errors.uid = "Uid is not define.";
 
-  if (isEmpty(data.email)) errors.email = "Email must not be empty";
-  else if (!isEmail(data.email)) errors.email = "Must be a valid email address";
+  // if (isEmpty(data.email)) errors.email = "Email must not be empty";
+  // else if (!isEmail(data.email)) errors.email = "Must be a valid email address";
 
   return {
     errors,
