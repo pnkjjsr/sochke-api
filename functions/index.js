@@ -40,7 +40,8 @@ const {
   addMp,
   minister,
   ministerType,
-  editMinister
+  editMinister,
+  getConstituencyMinster
 } = require("./routes/ministers");
 
 // party routes
@@ -96,6 +97,7 @@ app.post("/add-mp", addMp);
 app.post("/minister", minister);
 app.post("/minister-type", ministerType);
 app.post("/edit-minister", editMinister);
+app.post("/constituency-minister", getConstituencyMinster);
 
 // Party
 app.post("/party", party);

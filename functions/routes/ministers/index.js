@@ -1,10 +1,10 @@
-const { admin, db } = require("../../utils/admin");
 const {
   validateCouncillorData,
   validateAddCouncillorData
 } = require("./validators");
 
 exports.councillor = (req, res) => {
+  const { db } = require("../../utils/admin");
   const data = {
     constituency: req.body.pincode
   };
@@ -388,4 +388,59 @@ exports.editMinister = (req, res) => {
       message: `${ministerData.name} Minister updated`
     });
   });
+};
+
+exports.getConstituencyMinster = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    type: req.body.type,
+    pincode: req.body.pincode,
+    district: req.body.district
+  };
+
+  let minister = [];
+
+  let councillorRef = db.collection("councillors");
+  let queryRef = councillorRef.where("constituency", "==", data.pincode);
+  queryRef
+    .get()
+    .then(snapshot => {
+      if (!snapshot.empty) {
+        snapshot.forEach(doc => {
+          minister.push(doc.data());
+        });
+      }
+    })
+    .then(() => {
+      let mlaRef = db.collection("mlas");
+      let queryRef = mlaRef.where("constituency", "==", data.pincode);
+      queryRef
+        .get()
+        .then(snapshot => {
+          if (!snapshot.empty) {
+            snapshot.forEach(doc => {
+              minister.push(doc.data());
+            });
+          }
+        })
+        .then(() => {
+          let mpRef = db.collection("mps");
+          let queryRef = mpRef.where("constituency", "==", data.district);
+          queryRef
+            .get()
+            .then(snapshot => {
+              if (!snapshot.empty) {
+                snapshot.forEach(doc => {
+                  minister.push(doc.data());
+                });
+              }
+            })
+            .then(() => {
+              res.json(minister);
+            });
+        });
+    })
+    .catch(err => {
+      res.status(400).json(err);
+    });
 };
