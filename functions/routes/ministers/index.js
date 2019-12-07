@@ -442,3 +442,29 @@ exports.getConstituencyMinster = (req, res) => {
       res.status(400).json(err);
     });
 };
+
+exports.ministerVote = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    createdAt: new Date().toISOString(),
+    uid: req.body.uid,
+    mid: req.body.mid,
+    vote: req.body.vote
+  };
+
+  let colRef = db.collection("ministerVotes");
+  let docRef = colRef.doc();
+  data.id = docRef.id;
+  let setDoc = docRef
+    .set(data)
+    .then(() => {
+      res.json({
+        code: "minister/Vote",
+        status: "done",
+        message: "Vote added in minister name."
+      });
+    })
+    .catch(err => {
+      res.status(400).json(err);
+    });
+};
