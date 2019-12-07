@@ -112,33 +112,31 @@ exports.addCouncillor = (req, res) => {
 };
 
 exports.mla = (req, res) => {
+  const { db } = require("../../utils/admin");
   const data = {
     constituency: req.body.pincode
   };
 
-  // const {
-  //     valid,
-  //     errors
-  // } = validateCouncillorData(data);
-  // if (!valid) return res.status(400).json(errors);
-
+  let ministers = [];
   let mlaRef = db.collection("mlas");
   let queryRef = mlaRef.where("constituency", "==", data.constituency);
-  let winnerRef = queryRef.where("winner", "==", true);
 
-  winnerRef
+  queryRef
     .get()
     .then(snapshot => {
       if (snapshot.empty) {
         return res.status(400).json({
-          status: "fail",
+          code: "mla/empty",
+          status: "done",
           messsage: "No matching documents."
         });
       }
       snapshot.forEach(doc => {
-        let mlaData = doc.data();
-        return res.json(mlaData);
+        ministers.push(doc.data());
       });
+    })
+    .then(() => {
+      return res.json(ministers);
     })
     .catch(error => {
       return res.status(400).json(error);
