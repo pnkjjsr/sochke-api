@@ -9,12 +9,6 @@ exports.councillor = (req, res) => {
     constituency: req.body.pincode
   };
 
-  // const {
-  //     valid,
-  //     errors
-  // } = validateCouncillorData(data);
-  // if (!valid) return res.status(400).json(errors);
-
   let councillorRef = db.collection("councillors");
   let constituencyRef = councillorRef.where(
     "constituency",
@@ -42,7 +36,9 @@ exports.councillor = (req, res) => {
       return res.status(400).json(error);
     });
 };
+
 exports.addCouncillor = (req, res) => {
+  const { db } = require("../../utils/admin");
   const data = {
     createdAt: new Date().toISOString(),
     winner: false,
@@ -112,39 +108,39 @@ exports.addCouncillor = (req, res) => {
 };
 
 exports.mla = (req, res) => {
+  const { db } = require("../../utils/admin");
   const data = {
     constituency: req.body.pincode
   };
 
-  // const {
-  //     valid,
-  //     errors
-  // } = validateCouncillorData(data);
-  // if (!valid) return res.status(400).json(errors);
-
+  let ministers = [];
   let mlaRef = db.collection("mlas");
   let queryRef = mlaRef.where("constituency", "==", data.constituency);
-  let winnerRef = queryRef.where("winner", "==", true);
 
-  winnerRef
+  queryRef
     .get()
     .then(snapshot => {
       if (snapshot.empty) {
         return res.status(400).json({
-          status: "fail",
+          code: "mla/empty",
+          status: "done",
           messsage: "No matching documents."
         });
       }
       snapshot.forEach(doc => {
-        let mlaData = doc.data();
-        return res.json(mlaData);
+        ministers.push(doc.data());
       });
+    })
+    .then(() => {
+      return res.json(ministers);
     })
     .catch(error => {
       return res.status(400).json(error);
     });
 };
+
 exports.addMla = (req, res) => {
+  const { db } = require("../../utils/admin");
   const mlaData = {
     createdAt: new Date().toISOString(),
     pincode: req.body.pincode,
@@ -162,12 +158,6 @@ exports.addMla = (req, res) => {
     year: req.body.year,
     photoUrl: req.body.photo || ""
   };
-
-  // const {
-  //     valid,
-  //     errors
-  // } = validateAddCouncillorData(data);
-  // if (!valid) return res.status(400).json(errors);
 
   let mlaRef = db.collection("mlas");
   let queryRef = mlaRef.where("constituency", "==", mlaData.constituency);
@@ -207,15 +197,10 @@ exports.addMla = (req, res) => {
 };
 
 exports.mp = (req, res) => {
+  const { db } = require("../../utils/admin");
   const data = {
     constituency: req.body.district
   };
-
-  // const {
-  //     valid,
-  //     errors
-  // } = validateCouncillorData(data);
-  // if (!valid) return res.status(400).json(errors);
 
   let mpRef = db.collection("mps");
   let queryRef = mpRef.where("constituency", "==", data.constituency);
@@ -239,7 +224,9 @@ exports.mp = (req, res) => {
       return res.status(400).json(error);
     });
 };
+
 exports.addMp = (req, res) => {
+  const { db } = require("../../utils/admin");
   const mpData = {
     createdAt: new Date().toISOString(),
     pincode: req.body.pincode,
@@ -257,12 +244,6 @@ exports.addMp = (req, res) => {
     zone: req.body.zone,
     age: req.body.age
   };
-
-  // const {
-  //     valid,
-  //     errors
-  // } = validateAddCouncillorData(data);
-  // if (!valid) return res.status(400).json(errors);
 
   let mpRef = db.collection("mps");
   let queryRef = mpRef.where("constituency", "==", mpData.constituency);
@@ -300,6 +281,7 @@ exports.addMp = (req, res) => {
 };
 
 exports.minister = (req, res) => {
+  const { db } = require("../../utils/admin");
   const _res = res;
   let ministerData = [];
 
@@ -337,6 +319,7 @@ exports.minister = (req, res) => {
 };
 
 exports.ministerType = (req, res) => {
+  const { db } = require("../../utils/admin");
   let data = [];
   let ministerTypeRef = db.collection("minister_type").orderBy("order", "desc");
   ministerTypeRef
@@ -353,6 +336,7 @@ exports.ministerType = (req, res) => {
 };
 
 exports.editMinister = (req, res) => {
+  const { db } = require("../../utils/admin");
   const ministerData = {
     updatedAt: new Date().toISOString(),
     uid: req.body.uid,
@@ -373,12 +357,6 @@ exports.editMinister = (req, res) => {
     liabilities: req.body.liabilities,
     winner: req.body.winner
   };
-
-  // const {
-  //     valid,
-  //     errors
-  // } = validateAddCouncillorData(data);
-  // if (!valid) return res.status(400).json(errors);
 
   let updateMinister = db
     .collection(`${ministerData.type}s`)
@@ -442,5 +420,107 @@ exports.getConstituencyMinster = (req, res) => {
     })
     .catch(err => {
       res.status(400).json(err);
+    });
+};
+
+exports.ministerVote = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    createdAt: new Date().toISOString(),
+    uid: req.body.uid,
+    mid: req.body.mid,
+    vote: req.body.vote
+  };
+
+  let colRef = db.collection("ministerVotes");
+  let docRef = colRef.doc();
+  data.id = docRef.id;
+  let setDoc = docRef
+    .set(data)
+    .then(() => {
+      return res.json({
+        code: "minister/vote",
+        status: "done",
+        message: "Vote added in minister name."
+      });
+    })
+    .catch(err => {
+      return res.status(400).json(err);
+    });
+};
+
+exports.ministerVoted = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    uid: req.body.uid,
+    mid: req.body.mid
+  };
+
+  colRef = db.collection("ministerVotes");
+  query = colRef.where("uid", "==", data.uid).where("mid", "==", data.mid);
+
+  query
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        return res.json({
+          code: "vote/empty",
+          status: "done",
+          message: "User never vote for this minister"
+        });
+      }
+
+      return res.json({
+        code: "vote/voted",
+        status: "done",
+        message: "User already voted for this minister"
+      });
+    })
+    .catch(err => {
+      return res.status(400).json(err);
+    });
+};
+
+exports.ministerValue = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    mid: req.body.mid
+  };
+
+  let totalVote = 0;
+  let trueVote = 0;
+  let colRef = db.collection("ministerVotes");
+  let query = colRef.where("mid", "==", data.mid);
+  query
+    .get()
+    .then(async snapshot => {
+      if (snapshot.empty) {
+        return res.json({
+          code: "vote/empty",
+          status: "done",
+          message: "This minister not voted yet."
+        });
+      }
+
+      totalVote = snapshot.size;
+
+      await snapshot.forEach(doc => {
+        const vData = doc.data();
+
+        if (vData.vote == true) {
+          trueVote++;
+        }
+      });
+    })
+    .then(() => {
+      res.json({
+        code: "vote/data",
+        status: "done",
+        vote_total: totalVote,
+        vote_true: trueVote
+      });
+    })
+    .catch(err => {
+      return res.status(404).json(err);
     });
 };
