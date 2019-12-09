@@ -60,7 +60,7 @@ const { electionYears } = require("./routes/elections");
 const { cronCouncillors, cronMlas, cronMps } = require("./routes/crons");
 
 // Poll
-const { getPoll } = require("./routes/polls");
+const { getPoll, postPoll } = require("./routes/polls");
 
 //** Main Express API setting */
 //** ============================ */
@@ -126,3 +126,4 @@ app.post("/add-mps", cronMps);
 
 // Polls
 app.post("/poll", getPoll);
+app.post("/add-poll", postPoll);
