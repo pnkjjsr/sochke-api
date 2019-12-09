@@ -9,15 +9,15 @@ exports.councillor = (req, res) => {
     constituency: req.body.pincode
   };
 
+  let ministers = [];
   let councillorRef = db.collection("councillors");
   let constituencyRef = councillorRef.where(
     "constituency",
     "==",
     data.constituency
   );
-  let winnerRef = constituencyRef.where("winner", "==", true);
 
-  winnerRef
+  constituencyRef
     .get()
     .then(snapshot => {
       if (snapshot.empty) {
@@ -25,12 +25,13 @@ exports.councillor = (req, res) => {
           status: "fail",
           messsage: "No matching documents."
         });
-        return;
       }
       snapshot.forEach(doc => {
-        let councillorData = doc.data();
-        return res.json(councillorData);
+        ministers.push(doc.data());
       });
+    })
+    .then(() => {
+      return res.json(ministers);
     })
     .catch(error => {
       return res.status(400).json(error);
@@ -202,11 +203,11 @@ exports.mp = (req, res) => {
     constituency: req.body.district
   };
 
+  let ministers = [];
   let mpRef = db.collection("mps");
   let queryRef = mpRef.where("constituency", "==", data.constituency);
-  let winnerRef = queryRef.where("winner", "==", true);
 
-  winnerRef
+  queryRef
     .get()
     .then(snapshot => {
       if (snapshot.empty) {
@@ -216,9 +217,11 @@ exports.mp = (req, res) => {
         });
       }
       snapshot.forEach(doc => {
-        let mpData = doc.data();
-        return res.json(mpData);
+        ministers.push(doc.data());
       });
+    })
+    .then(() => {
+      return res.json(ministers);
     })
     .catch(error => {
       return res.status(400).json(error);
