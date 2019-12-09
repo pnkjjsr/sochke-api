@@ -3,6 +3,20 @@ const app = require("express")();
 const main = require("express")();
 const cors = require("cors");
 
+const { checkIfAuthenticated } = require("./middleware");
+
+//** Main Express API setting */
+//** ======================================================== */
+main.use(cors());
+main.use("/v1", app);
+exports.api = functions.https.onRequest(main);
+
+// app.use(checkIfAuthenticated);
+
+//** ======================================================== */
+//** ======================================================== */
+
+// Test Hit
 const { test } = require("./routes/tests");
 
 // user routes
@@ -61,13 +75,6 @@ const { cronCouncillors, cronMlas, cronMps } = require("./routes/crons");
 
 // Poll
 const { getPoll, postPoll } = require("./routes/polls");
-
-//** Main Express API setting */
-//** ============================ */
-main.use(cors());
-main.use("/v1", app);
-exports.api = functions.https.onRequest(main);
-//** ============================ */
 
 // Test
 app.post("/test", test);
