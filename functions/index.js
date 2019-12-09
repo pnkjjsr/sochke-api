@@ -3,6 +3,20 @@ const app = require("express")();
 const main = require("express")();
 const cors = require("cors");
 
+const { checkIfAuthenticated } = require("./middleware");
+
+//** Main Express API setting */
+//** ======================================================== */
+main.use(cors());
+main.use("/v1", app);
+exports.api = functions.https.onRequest(main);
+
+// app.use(checkIfAuthenticated);
+
+//** ======================================================== */
+//** ======================================================== */
+
+// Test Hit
 const { test } = require("./routes/tests");
 
 // user routes
@@ -59,12 +73,8 @@ const { electionYears } = require("./routes/elections");
 // Cron Jobs
 const { cronCouncillors, cronMlas, cronMps } = require("./routes/crons");
 
-//** Main Express API setting */
-//** ============================ */
-main.use(cors());
-main.use("/v1", app);
-exports.api = functions.https.onRequest(main);
-//** ============================ */
+// Poll
+const { getPoll, postPoll } = require("./routes/polls");
 
 // Test
 app.post("/test", test);
@@ -120,3 +130,7 @@ app.post("/state-zones", stateZones);
 app.post("/add-councillors", cronCouncillors);
 app.post("/add-mlas", cronMlas);
 app.post("/add-mps", cronMps);
+
+// Polls
+app.post("/poll", getPoll);
+app.post("/add-poll", postPoll);

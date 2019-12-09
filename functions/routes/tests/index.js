@@ -1,6 +1,11 @@
 // Get all respond
 exports.test = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    createdAt: new Date().toISOString(),
+    uid: req.body.uid
+  };
   let token = req.headers["x-access-token"] || req.headers["authorization"];
 
-  res.json(token);
+  res.json(data);
 };
