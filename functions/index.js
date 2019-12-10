@@ -11,7 +11,7 @@ main.use(cors());
 main.use("/v1", app);
 exports.api = functions.https.onRequest(main);
 
-// app.use(checkIfAuthenticated);
+app.use(checkIfAuthenticated);
 
 //** ======================================================== */
 //** ======================================================== */
