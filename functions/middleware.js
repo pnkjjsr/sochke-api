@@ -15,16 +15,21 @@ const getAuthToken = (req, res, next) => {
 const checkIfAuthenticated = (req, res, next) => {
   getAuthToken(req, res, async () => {
     let authToken = req.headers["authorization"];
-    let xAccessToken = req.headers["x-access-token"];
 
     try {
-      const userInfo = await admin.auth().verifyIdToken(authToken);
-      req.authId = userInfo.uid;
-      return next();
+      await admin
+        .auth()
+        .verifyIdToken(authToken)
+        .then(res => {
+          req.authId = res.user_id;
+          return next();
+        });
     } catch (e) {
-      return res
-        .status(401)
-        .send({ error: "You are not authorized to make this request" });
+      return res.status(401).send({
+        status: "fail",
+        code: "auth/fail",
+        error: "You are not authorized to make this request"
+      });
     }
   });
 };
