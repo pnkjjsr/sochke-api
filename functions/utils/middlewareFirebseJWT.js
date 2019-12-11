@@ -1,4 +1,4 @@
-const { admin } = require("./utils/admin");
+const { admin } = require("./admin");
 
 const getAuthToken = (req, res, next) => {
   if (
@@ -9,12 +9,17 @@ const getAuthToken = (req, res, next) => {
   } else {
     req.authToken = null;
   }
+
   next();
 };
 
 const checkIfAuthenticated = (req, res, next) => {
   getAuthToken(req, res, async () => {
     let authToken = req.headers["authorization"];
+    let xAccessToken = req.headers["x-access-token"];
+    let X_ACCESS_TOKEN = process.env.X_ACCESS_TOKEN;
+
+    if (xAccessToken == X_ACCESS_TOKEN) return next();
 
     try {
       await admin

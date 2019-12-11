@@ -41,6 +41,7 @@ exports.login = (req, res) => {
 // Sign users up
 exports.signup = (req, res) => {
   const { db } = require("../../utils/admin");
+  let userName = req.body.email.match(/^(.+)@/)[1];
   const newUser = {
     createdAt: new Date().toISOString(),
     uid: req.body.uid,
@@ -58,7 +59,8 @@ exports.signup = (req, res) => {
     division: req.body.division,
     state: req.body.state,
     pincode: req.body.pincode,
-    country: req.body.country
+    country: req.body.country,
+    userName: userName
   };
 
   const { valid, errors } = validateSignupData(newUser);

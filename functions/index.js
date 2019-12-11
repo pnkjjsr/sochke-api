@@ -3,7 +3,7 @@ const app = require("express")();
 const main = require("express")();
 const cors = require("cors");
 
-const { checkIfAuthenticated } = require("./middleware");
+const { checkIfAuthenticated } = require("./utils/middlewareFirebseJWT");
 
 //** Main Express API setting */
 //** ======================================================== */
@@ -76,6 +76,12 @@ const { cronCouncillors, cronMlas, cronMps } = require("./routes/crons");
 // Poll
 const { getPoll, postPoll } = require("./routes/polls");
 
+// Profile
+const { getProfile } = require("./routes/profile");
+
+//****************************************************************/
+// ** API Request here*/
+//****************************************************************/
 // Test
 app.post("/test", test);
 
@@ -134,3 +140,6 @@ app.post("/add-mps", cronMps);
 // Polls
 app.post("/poll", getPoll);
 app.post("/add-poll", postPoll);
+
+// ProfilePage
+app.post("/page-profile", getProfile);
