@@ -5,30 +5,38 @@ exports.getProfile = (req, res) => {
     userName: req.body.userName
   };
 
-  let pageData = {};
+  let pageData = {
+    responds: []
+  };
 
   const colRef = db.collection("users").where("userName", "==", data.userName);
 
   let transaction = db
     .runTransaction(t => {
       return t.get(colRef).then(snapshot => {
-        let uid;
+        let uData;
         snapshot.forEach(doc => {
-          uid = doc.data().uid;
+          uData = doc.data();
+          pageData.userData = uData;
         });
 
         let respondCount = db
           .collection("responds")
-          .where("uid", "==", uid)
+          .where("uid", "==", uData.uid)
           .get()
           .then(snapshot => {
             let respondCount = snapshot.size;
             pageData.respondCount = respondCount;
+
+            snapshot.forEach(doc => {
+              let rData = doc.data();
+              pageData.responds.push(rData);
+            });
           });
 
         let contributionRef = db
           .collection("contributions")
-          .where("uid", "==", uid)
+          .where("uid", "==", uData.uid)
           .get()
           .then(snapshot => {
             let contributionCount = snapshot.size;
@@ -37,7 +45,7 @@ exports.getProfile = (req, res) => {
 
         let respondMediaRef = db
           .collection("responds")
-          .where("uid", "==", uid)
+          .where("uid", "==", uData.uid)
           .where("type", "==", "media")
           .get()
           .then(snapshot => {
@@ -47,7 +55,7 @@ exports.getProfile = (req, res) => {
 
         let beliversRef = db
           .collection("connections")
-          .where("leaderId", "==", uid)
+          .where("leaderId", "==", uData.uid)
           .where("active", "==", true)
           .get()
           .then(snapshot => {
@@ -57,7 +65,7 @@ exports.getProfile = (req, res) => {
 
         let leadersRef = db
           .collection("connections")
-          .where("uid", "==", uid)
+          .where("uid", "==", uData.uid)
           .where("active", "==", true)
           .get()
           .then(snapshot => {
