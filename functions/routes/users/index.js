@@ -93,7 +93,11 @@ exports.signup = (req, res) => {
             }
           })
           .then(() => {
-            return res.status(201).json(newUser);
+            return res.status(201).json({
+              status: "done",
+              code: "user/created",
+              message: "New user created and saved."
+            });
           })
           .catch(err => {
             if (err.code === "auth/email-already-in-use") {
