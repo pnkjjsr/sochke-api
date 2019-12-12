@@ -65,7 +65,7 @@ const {
 const { party, addParty, editParty } = require("./routes/parties");
 
 // Locations Routes
-const { stateZones } = require("./routes/locations");
+const { stateZones, postArea } = require("./routes/locations");
 
 // Election routes
 const { electionYears } = require("./routes/elections");
@@ -131,6 +131,7 @@ app.post("/election-years", electionYears);
 
 // Locations
 app.post("/state-zones", stateZones);
+app.post("/add-area", postArea);
 
 // Cron Jobs
 app.post("/add-councillors", cronCouncillors);
