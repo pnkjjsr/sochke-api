@@ -35,17 +35,32 @@ exports.postArea = (req, res) => {
   let colRef = db.collection("areas");
   let docRef = colRef.doc();
   data.id = docRef.id;
-
-  docRef
-    .set(data)
-    .then(() => {
-      res.json({
-        status: "done",
-        code: "location/added",
-        message: "Area saved in with pincode."
-      });
+  let query = colRef.where("pincode", "==", data.pincode);
+  query
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        docRef
+          .set(data)
+          .then(() => {
+            return res.json({
+              status: "done",
+              code: "location/added",
+              message: "Area saved in with pincode."
+            });
+          })
+          .catch(err => {
+            res.status(404).json(err);
+          });
+      } else {
+        return res.json({
+          status: "done",
+          code: "location/already-added",
+          message: "This pincode area already added in our db."
+        });
+      }
     })
     .catch(err => {
-      res.status(404).json(err);
+      return res.status(404).json(err);
     });
 };
