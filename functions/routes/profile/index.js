@@ -17,7 +17,11 @@ exports.getProfile = (req, res) => {
         let uData;
         snapshot.forEach(doc => {
           uData = doc.data();
-          pageData.userData = uData;
+          pageData.userName = uData.userName;
+          pageData.displayName = uData.displayName;
+          pageData.photoURL = uData.photoURL;
+          pageData.area = uData.area;
+          pageData.pincode = uData.pincode;
         });
 
         let respondCount = db
