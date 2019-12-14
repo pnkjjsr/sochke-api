@@ -14,6 +14,14 @@ exports.getProfile = (req, res) => {
   let transaction = db
     .runTransaction(t => {
       return t.get(colRef).then(snapshot => {
+        if (snapshot.empty) {
+          return res.status(200).json({
+            status: "done",
+            code: "profile/empty",
+            message: "no user found."
+          });
+        }
+
         let uData;
         snapshot.forEach(doc => {
           uData = doc.data();
