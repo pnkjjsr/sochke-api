@@ -71,13 +71,18 @@ const { stateZones, postArea } = require("./routes/locations");
 const { electionYears } = require("./routes/elections");
 
 // Cron Jobs
-const { cronCouncillors, cronMlas, cronMps } = require("./routes/crons");
+const {
+  cronCouncillors,
+  cronMlas,
+  cronMps,
+  cronPolls
+} = require("./routes/crons");
 
 // Poll
 const { getPoll, postPoll } = require("./routes/polls");
 
-// Profile
-const { getProfile } = require("./routes/profile");
+// Pages
+const { getProfile, getHome } = require("./routes/pages");
 
 //****************************************************************/
 // ** API Request here*/
@@ -137,6 +142,7 @@ app.post("/add-area", postArea);
 app.post("/add-councillors", cronCouncillors);
 app.post("/add-mlas", cronMlas);
 app.post("/add-mps", cronMps);
+app.post("/add-polls", cronPolls);
 
 // Polls
 app.post("/poll", getPoll);
@@ -144,3 +150,4 @@ app.post("/add-poll", postPoll);
 
 // ProfilePage
 app.post("/page-profile", getProfile);
+app.post("/page-home", getHome);
