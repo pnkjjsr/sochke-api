@@ -27,6 +27,8 @@ const {
   updateLocation,
   sendEmailVerification,
   getUserDetails,
+  addUserPhoto,
+  addUserName,
   addUserDetails,
   updatePhone,
   verifyPhone,
@@ -96,6 +98,8 @@ app.post("/signup", signup);
 app.post("/location", updateLocation);
 app.post("/getLocation", getLocation);
 app.post("/user", getUserDetails);
+app.post("/add-user-photo", addUserPhoto);
+app.post("/add-user-name", addUserName);
 app.post("/update-user", addUserDetails);
 app.post("/email", sendEmailVerification);
 app.post("/phone", updatePhone);

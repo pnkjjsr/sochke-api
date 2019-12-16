@@ -8,7 +8,9 @@ const {
   validateMobileData,
   validateOTPData,
   validateRespond,
-  validatePassword
+  validatePassword,
+  validatePhotoData,
+  validateNameData
 } = require("./validators");
 
 // Log user in
@@ -593,6 +595,60 @@ exports.markNotificationsRead = (req, res) => {
     .then(() => {
       return res.json({
         message: "Notifications marked read"
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      return res.status(500).json({
+        error: err.code
+      });
+    });
+};
+
+// Add User Photo
+exports.addUserPhoto = (req, res) => {
+  const { db } = require("../../utils/admin");
+  let data = {
+    uid: req.body.uid,
+    photoURL: req.body.photoURL
+  };
+
+  const { valid, errors } = validatePhotoData(data);
+
+  if (!valid) return res.status(400).json(errors);
+
+  db.doc(`/users/${data.uid}`)
+    .update(data)
+    .then(() => {
+      return res.json({
+        status: "done",
+        message: "Details added successfully"
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      return res.status(500).json({
+        error: err.code
+      });
+    });
+};
+
+exports.addUserName = (req, res) => {
+  const { db } = require("../../utils/admin");
+  let data = {
+    uid: req.body.uid,
+    displayName: req.body.displayName
+  };
+
+  const { valid, errors } = validateNameData(data);
+  if (!valid) return res.status(400).json(errors);
+
+  db.doc(`/users/${data.uid}`)
+    .update(data)
+    .then(() => {
+      return res.json({
+        status: "done",
+        message: "Details added successfully"
       });
     })
     .catch(err => {
