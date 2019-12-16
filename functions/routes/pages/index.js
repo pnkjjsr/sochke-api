@@ -204,11 +204,12 @@ exports.getHome = (req, res) => {
 
           let allPoll = db
             .collection("polls")
-            .where("constituency", "==", uData.area)
-            .where("constituency", "==", uData.district)
-            .where("constituency", "==", uData.state)
+            .where("state", "==", uData.state)
+            .limit(10)
             .get()
             .then(snapshot => {
+              console.log(snapshot.empty);
+
               snapshot.forEach(doc => {
                 let snapData = doc.data();
                 pageData.polls.push(snapData);
