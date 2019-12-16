@@ -132,6 +132,11 @@ exports.getHome = (req, res) => {
 
           snapshot.forEach(doc => {
             uData = doc.data();
+            pageData.userName = uData.userName;
+            pageData.displayName = uData.displayName;
+            pageData.photoURL = uData.photoURL;
+            pageData.area = uData.area;
+            pageData.pincode = uData.pincode;
           });
 
           let allRespond = db
@@ -208,8 +213,6 @@ exports.getHome = (req, res) => {
             .limit(10)
             .get()
             .then(snapshot => {
-              console.log(snapshot.empty);
-
               snapshot.forEach(doc => {
                 let snapData = doc.data();
                 pageData.polls.push(snapData);
