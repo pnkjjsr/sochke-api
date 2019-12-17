@@ -151,3 +151,27 @@ exports.validatePassword = data => {
     valid: Object.keys(errors).length === 0 ? true : false
   };
 };
+
+exports.validatePhotoData = data => {
+  let errors = {};
+
+  if (isEmpty(data.uid)) errors.email = "Token is not define.";
+  if (isEmpty(data.photoURL)) errors.photoURL = "PhotoURL is empty.";
+
+  return {
+    errors,
+    valid: Object.keys(errors).length === 0 ? true : false
+  };
+};
+
+exports.validateNameData = data => {
+  let errors = {};
+
+  if (isEmpty(data.uid)) errors.email = "Token is not define.";
+  if (isEmpty(data.displayName)) errors.displayName = "Name is empty.";
+
+  return {
+    errors,
+    valid: Object.keys(errors).length === 0 ? true : false
+  };
+};

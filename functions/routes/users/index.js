@@ -8,7 +8,9 @@ const {
   validateMobileData,
   validateOTPData,
   validateRespond,
-  validatePassword
+  validatePassword,
+  validatePhotoData,
+  validateNameData
 } = require("./validators");
 
 // Log user in
@@ -41,6 +43,7 @@ exports.login = (req, res) => {
 // Sign users up
 exports.signup = (req, res) => {
   const { db } = require("../../utils/admin");
+  let userName = req.body.email.match(/^(.+)@/)[1];
   const newUser = {
     createdAt: new Date().toISOString(),
     uid: req.body.uid,
@@ -58,7 +61,8 @@ exports.signup = (req, res) => {
     division: req.body.division,
     state: req.body.state,
     pincode: req.body.pincode,
-    country: req.body.country
+    country: req.body.country,
+    userName: userName
   };
 
   const { valid, errors } = validateSignupData(newUser);
@@ -91,7 +95,11 @@ exports.signup = (req, res) => {
             }
           })
           .then(() => {
-            return res.status(201).json(newUser);
+            return res.status(201).json({
+              status: "done",
+              code: "user/created",
+              message: "New user created and saved."
+            });
           })
           .catch(err => {
             if (err.code === "auth/email-already-in-use") {
@@ -587,6 +595,60 @@ exports.markNotificationsRead = (req, res) => {
     .then(() => {
       return res.json({
         message: "Notifications marked read"
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      return res.status(500).json({
+        error: err.code
+      });
+    });
+};
+
+// Add User Photo
+exports.addUserPhoto = (req, res) => {
+  const { db } = require("../../utils/admin");
+  let data = {
+    uid: req.body.uid,
+    photoURL: req.body.photoURL
+  };
+
+  const { valid, errors } = validatePhotoData(data);
+
+  if (!valid) return res.status(400).json(errors);
+
+  db.doc(`/users/${data.uid}`)
+    .update(data)
+    .then(() => {
+      return res.json({
+        status: "done",
+        message: "Details added successfully"
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      return res.status(500).json({
+        error: err.code
+      });
+    });
+};
+
+exports.addUserName = (req, res) => {
+  const { db } = require("../../utils/admin");
+  let data = {
+    uid: req.body.uid,
+    displayName: req.body.displayName
+  };
+
+  const { valid, errors } = validateNameData(data);
+  if (!valid) return res.status(400).json(errors);
+
+  db.doc(`/users/${data.uid}`)
+    .update(data)
+    .then(() => {
+      return res.json({
+        status: "done",
+        message: "Details added successfully"
       });
     })
     .catch(err => {

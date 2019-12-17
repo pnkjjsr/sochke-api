@@ -82,11 +82,13 @@ exports.respond = (req, res) => {
 exports.addRespond = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = {
-    createdAt: new Date().toISOString(),
+    createdAt: req.body.createdAt,
     uid: req.body.uid,
     type: req.body.type,
     respond: req.body.respond,
-    imageUrl: req.body.imageUrl || ""
+    imageUrl: req.body.imageUrl || "",
+    voteCount: req.body.voteCount,
+    opinionCount: req.body.opinionCount
   };
 
   const { valid, errors } = validateRespond(data);
@@ -112,43 +114,82 @@ exports.voteRespond = (req, res) => {
   let data = {
     createdAt: new Date().toISOString(),
     rid: req.body.rid,
-    uid: req.body.uid
+    uid: req.body.uid,
+    vote: true
   };
 
-  let likeRef = db.collection("likes");
+  let votesRef = db.collection("respondVotes");
 
-  let queryRef = likeRef
+  let queryRef = votesRef
     .where("rid", "==", data.rid)
     .where("uid", "==", data.uid);
 
-  queryRef
-    .get()
-    .then(snapshot => {
-      if (snapshot.empty) {
-        let newLikeRef = likeRef.doc();
-        data.id = newLikeRef.id;
-        let setDoc = newLikeRef.set(data).then(ref => {
-          return res.json({
-            status: "done",
-            message: "Like added successfully"
-          });
-        });
-      }
+  let transaction = db
+    .runTransaction(t => {
+      return t
+        .get(queryRef)
+        .then(snapshot => {
+          let voteStatus = false;
 
-      snapshot.forEach(doc => {
-        likeRef
-          .doc(doc.id)
-          .delete()
-          .then(() => {
-            return res.json({
-              status: "done",
-              message: "This respond Like removed from this user."
+          if (snapshot.empty) {
+            let docRef = votesRef.doc();
+            data.id = docRef.id;
+            docRef.set(data);
+          } else {
+            snapshot.forEach(doc => {
+              let voteData = doc.data();
+              voteStatus = voteData.vote;
+              console.log(voteStatus);
+
+              if (!voteData.vote) {
+                votesRef.doc(doc.id).update({
+                  vote: true
+                });
+              } else {
+                votesRef.doc(doc.id).update({
+                  vote: false
+                });
+              }
             });
-          });
+          }
+
+          let getRespond = db
+            .collection("responds")
+            .doc(data.rid)
+            .get()
+            .then(doc => {
+              let voteCount = doc.data().voteCount;
+              updateRespond(voteCount);
+            });
+
+          let respondRef = db.collection("responds").doc(data.rid);
+          let updateRespond = e => {
+            if (!voteStatus) {
+              respondRef.update({
+                voteCount: e + 1
+              });
+            } else {
+              respondRef.update({
+                voteCount: e - 1
+              });
+            }
+          };
+
+          return Promise.all([getRespond]);
+        })
+        .catch(err => {
+          return res.status(404).json(err);
+        });
+    })
+    .then(() => {
+      return res.json({
+        status: "done",
+        code: "vote/update",
+        message: "Vote update in all collections."
       });
     })
     .catch(err => {
-      res.status(404).json(err);
+      return res.status(404).json(err);
     });
 };
 

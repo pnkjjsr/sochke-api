@@ -3,7 +3,7 @@ const app = require("express")();
 const main = require("express")();
 const cors = require("cors");
 
-const { checkIfAuthenticated } = require("./middleware");
+const { checkIfAuthenticated } = require("./utils/middlewareFirebseJWT");
 
 //** Main Express API setting */
 //** ======================================================== */
@@ -27,6 +27,8 @@ const {
   updateLocation,
   sendEmailVerification,
   getUserDetails,
+  addUserPhoto,
+  addUserName,
   addUserDetails,
   updatePhone,
   verifyPhone,
@@ -65,17 +67,28 @@ const {
 const { party, addParty, editParty } = require("./routes/parties");
 
 // Locations Routes
-const { stateZones } = require("./routes/locations");
+const { stateZones, postArea } = require("./routes/locations");
 
 // Election routes
 const { electionYears } = require("./routes/elections");
 
 // Cron Jobs
-const { cronCouncillors, cronMlas, cronMps } = require("./routes/crons");
+const {
+  cronCouncillors,
+  cronMlas,
+  cronMps,
+  cronPolls
+} = require("./routes/crons");
 
 // Poll
 const { getPoll, postPoll } = require("./routes/polls");
 
+// Pages
+const { getProfile, getHome } = require("./routes/pages");
+
+//****************************************************************/
+// ** API Request here*/
+//****************************************************************/
 // Test
 app.post("/test", test);
 
@@ -85,6 +98,8 @@ app.post("/signup", signup);
 app.post("/location", updateLocation);
 app.post("/getLocation", getLocation);
 app.post("/user", getUserDetails);
+app.post("/add-user-photo", addUserPhoto);
+app.post("/add-user-name", addUserName);
 app.post("/update-user", addUserDetails);
 app.post("/email", sendEmailVerification);
 app.post("/phone", updatePhone);
@@ -125,12 +140,18 @@ app.post("/election-years", electionYears);
 
 // Locations
 app.post("/state-zones", stateZones);
+app.post("/add-area", postArea);
 
 // Cron Jobs
 app.post("/add-councillors", cronCouncillors);
 app.post("/add-mlas", cronMlas);
 app.post("/add-mps", cronMps);
+app.post("/add-polls", cronPolls);
 
 // Polls
 app.post("/poll", getPoll);
 app.post("/add-poll", postPoll);
+
+// ProfilePage
+app.post("/page-profile", getProfile);
+app.post("/page-home", getHome);

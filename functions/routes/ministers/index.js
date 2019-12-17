@@ -516,7 +516,7 @@ exports.ministerValue = (req, res) => {
       });
     })
     .then(() => {
-      res.json({
+      return res.json({
         code: "vote/data",
         status: "done",
         vote_total: totalVote,

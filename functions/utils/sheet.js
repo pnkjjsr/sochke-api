@@ -4,7 +4,7 @@ const { google } = require("googleapis");
 exports.googleSheet = (code, type) => {
   return new Promise((resolve, reject) => {
     const sheetCode = code;
-    const ministerType = type;
+    const sheetType = type;
 
     // If modifying these scopes, delete token.json.
     const SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"];
@@ -18,7 +18,7 @@ exports.googleSheet = (code, type) => {
     fs.readFile("credentials.json", (err, content) => {
       if (err) return console.log("Error loading client secret file:", err);
       // Authorize a client with credentials, then call the Google Sheets API.
-      authorize(JSON.parse(content), listMajors);
+      authorize(JSON.parse(content), sheetData);
     });
 
     /**
@@ -55,8 +55,7 @@ exports.googleSheet = (code, type) => {
         scope: SCOPES
       });
 
-      let sheetAuthCode =
-        "4/tQHoh_icnapR3Cbc2Y3iF-S0PoUT4F7JZEhlik_vaZGVN3CzXhkk8_dPFsUFkNNM8UUPw22YO0w1dEDZIF6ONIc";
+      let sheetAuthCode = "";
 
       if (!sheetAuthCode) {
         return console.log(
@@ -86,7 +85,7 @@ exports.googleSheet = (code, type) => {
      * @see https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
      * @param {google.auth.OAuth2} Gauth The authenticated Google OAuth client.
      */
-    function listMajors(auth) {
+    function sheetData(auth) {
       const sheets = google.sheets({
         version: "v4",
         auth
@@ -94,7 +93,7 @@ exports.googleSheet = (code, type) => {
       sheets.spreadsheets.values.get(
         {
           spreadsheetId: sheetCode,
-          range: `${ministerType}!A2:O`
+          range: `${sheetType}!A2:O`
         },
         (err, res) => {
           if (err) return console.log("The API returned an error: " + err);
