@@ -146,7 +146,7 @@ exports.getHome = (req, res) => {
             .limit(25)
             .get()
             .then(snapshot => {
-              snapshot.forEach(doc => {
+              snapshot.forEach(async doc => {
                 let snapData = doc.data();
                 pageData.responds.push(snapData);
               });
