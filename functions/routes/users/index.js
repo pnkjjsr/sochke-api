@@ -658,3 +658,100 @@ exports.addUserName = (req, res) => {
       });
     });
 };
+
+// Add Leader - Believe true
+exports.believe = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    createdAt: req.body.createdAt,
+    lid: req.body.lid,
+    bid: req.body.bid,
+    believe: true
+  };
+
+  let colRef = db.collection("connections");
+  let querylRef = colRef
+    .where("bid", "==", data.bid)
+    .where("lid", "==", data.lid);
+
+  querylRef
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        let docRef = colRef.doc();
+        data.id = docRef.id;
+        docRef
+          .set(data)
+          .then(() => {
+            return res.json({
+              status: "done",
+              code: "leader/added",
+              message: "Leader added successfully"
+            });
+          })
+          .catch(err => {
+            return res.status(404).json(err);
+          });
+      }
+
+      snapshot.forEach(doc => {
+        let docRef = doc.data().id;
+        let updateData = {
+          changedAt: new Date().toISOString(),
+          believe: true
+        };
+        colRef
+          .doc(docRef)
+          .update(updateData)
+          .then(() => {
+            return res.json({
+              status: "done",
+              code: "leader/added",
+              message: "Leader added in believe list."
+            });
+          });
+      });
+    })
+    .catch(err => {
+      return res.status(404).json(err);
+    });
+};
+
+// Remove Leader - belive false
+exports.rethink = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    lid: req.body.lid,
+    bid: req.body.bid
+  };
+
+  let colRef = db.collection("connections");
+  let querylRef = colRef
+    .where("bid", "==", data.bid)
+    .where("lid", "==", data.lid);
+
+  querylRef
+    .get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        let docRef = doc.data().id;
+        let updateData = {
+          changedAt: new Date().toISOString(),
+          believe: false
+        };
+        colRef
+          .doc(docRef)
+          .update(updateData)
+          .then(() => {
+            return res.json({
+              status: "done",
+              code: "leader/rethink",
+              message: "Leader removed from believe list."
+            });
+          });
+      });
+    })
+    .catch(err => {
+      return res.status(404).json(err);
+    });
+};

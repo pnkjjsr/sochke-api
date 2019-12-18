@@ -2,6 +2,7 @@
 exports.getProfile = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = {
+    uid: req.body.uid,
     userName: req.body.userName
   };
 
@@ -25,6 +26,7 @@ exports.getProfile = (req, res) => {
         let uData;
         snapshot.forEach(doc => {
           uData = doc.data();
+          pageData.uid = uData.uid;
           pageData.userName = uData.userName;
           pageData.displayName = uData.displayName;
           pageData.photoURL = uData.photoURL;
@@ -69,8 +71,8 @@ exports.getProfile = (req, res) => {
 
         let beliversRef = db
           .collection("connections")
-          .where("leaderId", "==", uData.uid)
-          .where("active", "==", true)
+          .where("lid", "==", uData.uid)
+          .where("believe", "==", true)
           .get()
           .then(snapshot => {
             let beliverCount = snapshot.size;
@@ -79,12 +81,26 @@ exports.getProfile = (req, res) => {
 
         let leadersRef = db
           .collection("connections")
-          .where("uid", "==", uData.uid)
-          .where("active", "==", true)
+          .where("bid", "==", uData.uid)
+          .where("believe", "==", true)
           .get()
           .then(snapshot => {
             let leaderCount = snapshot.size;
             pageData.leaderCount = leaderCount;
+          });
+
+        let believeRef = db
+          .collection("connections")
+          .where("bid", "==", data.uid)
+          .where("lid", "==", uData.uid)
+          .get()
+          .then(snapshot => {
+            if (snapshot.empty) {
+              pageData.believe = false;
+            }
+            snapshot.forEach(doc => {
+              pageData.believe = doc.data().believe;
+            });
           });
 
         return Promise.all([
@@ -92,7 +108,8 @@ exports.getProfile = (req, res) => {
           contributionRef,
           respondMediaRef,
           beliversRef,
-          leadersRef
+          leadersRef,
+          believeRef
         ]);
       });
     })

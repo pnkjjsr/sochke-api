@@ -17,7 +17,7 @@ app.use(checkIfAuthenticated);
 //** ======================================================== */
 
 // Test Hit
-const { test } = require("./routes/tests");
+const { postSession, test } = require("./routes/session");
 
 // user routes
 const {
@@ -33,7 +33,9 @@ const {
   updatePhone,
   verifyPhone,
   registeredEmail,
-  verifyPassword
+  verifyPassword,
+  believe,
+  rethink
 } = require("./routes/users");
 
 // respond routes
@@ -90,6 +92,7 @@ const { getProfile, getHome } = require("./routes/pages");
 // ** API Request here*/
 //****************************************************************/
 // Test
+app.post("/session", postSession);
 app.post("/test", test);
 
 // User routes
@@ -106,6 +109,8 @@ app.post("/phone", updatePhone);
 app.post("/verifyPhone", verifyPhone);
 app.post("/registered-email", registeredEmail);
 app.post("/verify-password", verifyPassword);
+app.post("/i-believe", believe);
+app.post("/rethink", rethink);
 
 // Responds Routes
 app.post("/respond", respond);
