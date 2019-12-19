@@ -7,7 +7,9 @@ exports.getProfile = (req, res) => {
   };
 
   let pageData = {
-    responds: []
+    responds: [],
+    believers: [],
+    leaders: []
   };
 
   const colRef = db.collection("users").where("userName", "==", data.userName);
@@ -77,6 +79,23 @@ exports.getProfile = (req, res) => {
           .then(snapshot => {
             let beliverCount = snapshot.size;
             pageData.believerCount = beliverCount;
+
+            snapshot.docs.map(doc => {
+              let believerRef = doc.data().bid;
+
+              db.collection("users")
+                .doc(believerRef)
+                .get()
+                .then(doc => {
+                  let believerData = {
+                    userName: doc.data().userName,
+                    displayName: doc.data().displayName,
+                    photoURL: doc.data().photoURL
+                  };
+
+                  pageData.believers.push(believerData);
+                });
+            });
           });
 
         let leadersRef = db
@@ -87,6 +106,10 @@ exports.getProfile = (req, res) => {
           .then(snapshot => {
             let leaderCount = snapshot.size;
             pageData.leaderCount = leaderCount;
+
+            snapshot.forEach(doc => {
+              pageData.leaders.push(doc.data());
+            });
           });
 
         let believeRef = db
@@ -110,12 +133,12 @@ exports.getProfile = (req, res) => {
           beliversRef,
           leadersRef,
           believeRef
-        ]);
+        ]).then(() => {
+          res.json(pageData);
+        });
       });
     })
-    .then(() => {
-      res.json(pageData);
-    })
+
     .catch(err => {
       console.log("Transaction failure:", err);
       res.status(404).json(err);

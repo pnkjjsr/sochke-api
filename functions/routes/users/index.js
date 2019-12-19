@@ -31,7 +31,23 @@ exports.login = (req, res) => {
       } else {
         let data = doc.data();
         delete data.password;
-        return res.status(201).json(data);
+        return res.status(201).json({
+          uid: data.uid,
+          email: data.email,
+          countryCode: data.countryCode,
+          phoneNumber: data.mobile,
+          displayName: data.displayName,
+          photoURL: data.photoURL,
+          area: data.area,
+          district: data.district,
+          division: data.division,
+          state: data.state,
+          pincode: data.pincode,
+          country: data.country,
+          userName: data.userName,
+          leaderCount: data.leaderCount,
+          believerCount: data.believerCount
+        });
       }
     })
     .catch(error => {
@@ -62,7 +78,9 @@ exports.signup = (req, res) => {
     state: req.body.state,
     pincode: req.body.pincode,
     country: req.body.country,
-    userName: userName
+    userName: userName,
+    leaderCount: 0,
+    believerCount: 0
   };
 
   const { valid, errors } = validateSignupData(newUser);
@@ -98,7 +116,24 @@ exports.signup = (req, res) => {
             return res.status(201).json({
               status: "done",
               code: "user/created",
-              message: "New user created and saved."
+              message: "New user created and saved.",
+              data: {
+                uid: newUser.uid,
+                email: newUser.email,
+                countryCode: "+91",
+                phoneNumber: newUser.mobile,
+                displayName: "",
+                photoURL: "",
+                area: newUser.area,
+                district: newUser.district,
+                division: newUser.division,
+                state: newUser.state,
+                pincode: newUser.pincode,
+                country: newUser.country,
+                userName: userName,
+                leaderCount: 0,
+                believerCount: 0
+              }
             });
           })
           .catch(err => {
@@ -670,51 +705,80 @@ exports.believe = (req, res) => {
   };
 
   let colRef = db.collection("connections");
-  let querylRef = colRef
+  let queryRef = colRef
     .where("bid", "==", data.bid)
     .where("lid", "==", data.lid);
 
-  querylRef
-    .get()
-    .then(snapshot => {
-      if (snapshot.empty) {
-        let docRef = colRef.doc();
-        data.id = docRef.id;
-        docRef
-          .set(data)
-          .then(() => {
-            return res.json({
-              status: "done",
-              code: "leader/added",
-              message: "Leader added successfully"
-            });
-          })
-          .catch(err => {
-            return res.status(404).json(err);
-          });
-      }
+  let transaction = db.runTransaction(t => {
+    return t
+      .get(queryRef)
+      .get()
+      .then(snapshot => {
+        if (snapshot.empty) {
+          let docRef = colRef.doc();
+          data.id = docRef.id;
+          docRef
+            .set(data)
+            .then(() => {
+              connectionUpdate();
 
-      snapshot.forEach(doc => {
-        let docRef = doc.data().id;
-        let updateData = {
-          changedAt: new Date().toISOString(),
-          believe: true
-        };
-        colRef
-          .doc(docRef)
-          .update(updateData)
-          .then(() => {
-            return res.json({
-              status: "done",
-              code: "leader/added",
-              message: "Leader added in believe list."
+              return res.json({
+                status: "done",
+                code: "leader/added",
+                message: "Leader added successfully"
+              });
+            })
+            .catch(err => {
+              return res.status(404).json(err);
             });
-          });
+        }
+
+        snapshot.forEach(doc => {
+          let docRef = doc.data().id;
+          let updateData = {
+            changedAt: new Date().toISOString(),
+            believe: true
+          };
+          colRef
+            .doc(docRef)
+            .update(updateData)
+            .then(() => {
+              connectionUpdate();
+
+              return res.json({
+                status: "done",
+                code: "leader/added",
+                message: "Leader added in believe list."
+              });
+            });
+        });
+
+        let connectionUpdate = () => {
+          let usersRef = db.collection("users");
+
+          usersRef
+            .doc(data.bid)
+            .get()
+            .then(doc => {
+              let newLeaderCount = doc.data().leaderCount + 1;
+              usersRef.doc(data.bid).update({ leaderCount: newLeaderCount });
+            });
+
+          usersRef
+            .doc(data.lid)
+            .get()
+            .then(doc => {
+              let newBelieverCount = doc.data().leaderCount + 1;
+              usersRef
+                .doc(data.lid)
+                .update({ believerCount: newBelieverCount });
+            });
+        };
+      })
+      .catch(err => {
+        return res.status(404).json(err);
       });
-    })
-    .catch(err => {
-      return res.status(404).json(err);
-    });
+  });
 };
 
 // Remove Leader - belive false
