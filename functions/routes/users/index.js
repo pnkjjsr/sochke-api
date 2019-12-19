@@ -699,20 +699,25 @@ exports.believe = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = {
     createdAt: req.body.createdAt,
+    uid: req.body.uid,
+    userName: req.body.userName,
+    displayName: req.body.displayName,
+    photoURL: req.body.photoURL,
     lid: req.body.lid,
-    bid: req.body.bid,
+    leaderUserName: req.body.leaderUserName,
+    leaderDisplayName: req.body.leaderDisplayName,
+    leaderPhotoURL: req.body.leaderPhotoURL,
     believe: true
   };
 
   let colRef = db.collection("connections");
   let queryRef = colRef
-    .where("bid", "==", data.bid)
+    .where("uid", "==", data.uid)
     .where("lid", "==", data.lid);
 
   let transaction = db.runTransaction(t => {
     return t
       .get(queryRef)
-      .get()
       .then(snapshot => {
         if (snapshot.empty) {
           let docRef = colRef.doc();
@@ -757,18 +762,18 @@ exports.believe = (req, res) => {
           let usersRef = db.collection("users");
 
           usersRef
-            .doc(data.bid)
+            .doc(data.uid)
             .get()
             .then(doc => {
               let newLeaderCount = doc.data().leaderCount + 1;
-              usersRef.doc(data.bid).update({ leaderCount: newLeaderCount });
+              usersRef.doc(data.uid).update({ leaderCount: newLeaderCount });
             });
 
           usersRef
             .doc(data.lid)
             .get()
             .then(doc => {
-              let newBelieverCount = doc.data().leaderCount + 1;
+              let newBelieverCount = doc.data().believerCount + 1;
               usersRef
                 .doc(data.lid)
                 .update({ believerCount: newBelieverCount });
@@ -786,36 +791,62 @@ exports.rethink = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = {
     lid: req.body.lid,
-    bid: req.body.bid
+    uid: req.body.uid
   };
 
   let colRef = db.collection("connections");
   let querylRef = colRef
-    .where("bid", "==", data.bid)
+    .where("uid", "==", data.uid)
     .where("lid", "==", data.lid);
 
-  querylRef
-    .get()
-    .then(snapshot => {
-      snapshot.forEach(doc => {
-        let docRef = doc.data().id;
-        let updateData = {
-          changedAt: new Date().toISOString(),
-          believe: false
-        };
-        colRef
-          .doc(docRef)
-          .update(updateData)
-          .then(() => {
-            return res.json({
-              status: "done",
-              code: "leader/rethink",
-              message: "Leader removed from believe list."
+  let transaction = db.runTransaction(t => {
+    return t
+      .get(querylRef)
+      .then(snapshot => {
+        snapshot.forEach(doc => {
+          let docRef = doc.data().id;
+          let updateData = {
+            changedAt: new Date().toISOString(),
+            believe: false
+          };
+          colRef
+            .doc(docRef)
+            .update(updateData)
+            .then(() => {
+              connectionUpdate();
+
+              return res.json({
+                status: "done",
+                code: "leader/rethink",
+                message: "Leader removed from believe list."
+              });
             });
-          });
+        });
+
+        let connectionUpdate = () => {
+          let usersRef = db.collection("users");
+
+          usersRef
+            .doc(data.uid)
+            .get()
+            .then(doc => {
+              let newLeaderCount = doc.data().leaderCount - 1;
+              usersRef.doc(data.uid).update({ leaderCount: newLeaderCount });
+            });
+
+          usersRef
+            .doc(data.lid)
+            .get()
+            .then(doc => {
+              let newBelieverCount = doc.data().believerCount - 1;
+              usersRef
+                .doc(data.lid)
+                .update({ believerCount: newBelieverCount });
+            });
+        };
+      })
+      .catch(err => {
+        return res.status(404).json(err);
       });
-    })
-    .catch(err => {
-      return res.status(404).json(err);
-    });
+  });
 };

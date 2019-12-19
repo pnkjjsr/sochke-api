@@ -28,12 +28,15 @@ exports.getProfile = (req, res) => {
         let uData;
         snapshot.forEach(doc => {
           uData = doc.data();
+
           pageData.uid = uData.uid;
           pageData.userName = uData.userName;
           pageData.displayName = uData.displayName;
           pageData.photoURL = uData.photoURL;
           pageData.area = uData.area;
           pageData.pincode = uData.pincode;
+          pageData.believerCount = uData.believerCount;
+          pageData.leaderCount = uData.leaderCount;
         });
 
         let respondCount = db
@@ -77,44 +80,27 @@ exports.getProfile = (req, res) => {
           .where("believe", "==", true)
           .get()
           .then(snapshot => {
-            let beliverCount = snapshot.size;
-            pageData.believerCount = beliverCount;
-
             snapshot.docs.map(doc => {
-              let believerRef = doc.data().bid;
-
-              db.collection("users")
-                .doc(believerRef)
-                .get()
-                .then(doc => {
-                  let believerData = {
-                    userName: doc.data().userName,
-                    displayName: doc.data().displayName,
-                    photoURL: doc.data().photoURL
-                  };
-
-                  pageData.believers.push(believerData);
-                });
+              let believerData = doc.data();
+              pageData.believers.push(believerData);
             });
           });
 
         let leadersRef = db
           .collection("connections")
-          .where("bid", "==", uData.uid)
+          .where("uid", "==", uData.uid)
           .where("believe", "==", true)
           .get()
           .then(snapshot => {
-            let leaderCount = snapshot.size;
-            pageData.leaderCount = leaderCount;
-
             snapshot.forEach(doc => {
-              pageData.leaders.push(doc.data());
+              let leaderData = doc.data();
+              pageData.leaders.push(leaderData);
             });
           });
 
         let believeRef = db
           .collection("connections")
-          .where("bid", "==", data.uid)
+          .where("uid", "==", data.uid)
           .where("lid", "==", uData.uid)
           .get()
           .then(snapshot => {
