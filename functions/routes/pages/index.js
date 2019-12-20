@@ -2,11 +2,14 @@
 exports.getProfile = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = {
+    uid: req.body.uid,
     userName: req.body.userName
   };
 
   let pageData = {
-    responds: []
+    responds: [],
+    believers: [],
+    leaders: []
   };
 
   const colRef = db.collection("users").where("userName", "==", data.userName);
@@ -25,11 +28,15 @@ exports.getProfile = (req, res) => {
         let uData;
         snapshot.forEach(doc => {
           uData = doc.data();
+
+          pageData.uid = uData.uid;
           pageData.userName = uData.userName;
           pageData.displayName = uData.displayName;
           pageData.photoURL = uData.photoURL;
           pageData.area = uData.area;
           pageData.pincode = uData.pincode;
+          pageData.believerCount = uData.believerCount;
+          pageData.leaderCount = uData.leaderCount;
         });
 
         let respondCount = db
@@ -69,22 +76,40 @@ exports.getProfile = (req, res) => {
 
         let beliversRef = db
           .collection("connections")
-          .where("leaderId", "==", uData.uid)
-          .where("active", "==", true)
+          .where("lid", "==", uData.uid)
+          .where("believe", "==", true)
           .get()
           .then(snapshot => {
-            let beliverCount = snapshot.size;
-            pageData.believerCount = beliverCount;
+            snapshot.docs.map(doc => {
+              let believerData = doc.data();
+              pageData.believers.push(believerData);
+            });
           });
 
         let leadersRef = db
           .collection("connections")
           .where("uid", "==", uData.uid)
-          .where("active", "==", true)
+          .where("believe", "==", true)
           .get()
           .then(snapshot => {
-            let leaderCount = snapshot.size;
-            pageData.leaderCount = leaderCount;
+            snapshot.forEach(doc => {
+              let leaderData = doc.data();
+              pageData.leaders.push(leaderData);
+            });
+          });
+
+        let believeRef = db
+          .collection("connections")
+          .where("uid", "==", data.uid)
+          .where("lid", "==", uData.uid)
+          .get()
+          .then(snapshot => {
+            if (snapshot.empty) {
+              pageData.believe = false;
+            }
+            snapshot.forEach(doc => {
+              pageData.believe = doc.data().believe;
+            });
           });
 
         return Promise.all([
@@ -92,13 +117,14 @@ exports.getProfile = (req, res) => {
           contributionRef,
           respondMediaRef,
           beliversRef,
-          leadersRef
-        ]);
+          leadersRef,
+          believeRef
+        ]).then(() => {
+          res.json(pageData);
+        });
       });
     })
-    .then(() => {
-      res.json(pageData);
-    })
+
     .catch(err => {
       console.log("Transaction failure:", err);
       res.status(404).json(err);
