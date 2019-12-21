@@ -1,5 +1,7 @@
 const { admin } = require("./admin");
 
+const xAccessToken = "k1g45jk145j";
+
 const getAuthToken = (req, res, next) => {
   if (
     req.headers.authorization &&
@@ -17,7 +19,7 @@ const checkIfAuthenticated = (req, res, next) => {
   getAuthToken(req, res, async () => {
     let authToken = req.headers["authorization"];
     let xAccessToken = req.headers["x-access-token"];
-    let X_ACCESS_TOKEN = process.env.X_ACCESS_TOKEN;
+    let X_ACCESS_TOKEN = xAccessToken;
 
     if (xAccessToken == X_ACCESS_TOKEN) return next();
 
