@@ -281,6 +281,7 @@ exports.getMinister = (req, res) => {
   let transaction = db
     .runTransaction(t => {
       return t.get(queryRef).then(snapshot => {
+        let mData = {};
         if (snapshot.empty) {
           pageData = {
             status: "done",
@@ -289,9 +290,22 @@ exports.getMinister = (req, res) => {
           };
         } else {
           snapshot.forEach(doc => {
+            mData = doc.data();
             pageData = doc.data();
           });
         }
+
+        let constituencyRef = db
+          .collection("constituencies")
+          .where("pincode", "==", mData.constituency)
+          .get()
+          .then(snapshot => {
+            snapshot.forEach(doc => {
+              pageData.constituencyArea = doc.data();
+            });
+          });
+
+        return Promise.all([constituencyRef]);
       });
     })
     .then(() => {
