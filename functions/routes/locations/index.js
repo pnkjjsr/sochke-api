@@ -32,7 +32,7 @@ exports.postArea = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = req.body;
 
-  let colRef = db.collection("areas");
+  let colRef = db.collection("constituencies");
   let docRef = colRef.doc();
   data.id = docRef.id;
   let query = colRef.where("pincode", "==", data.pincode);
@@ -40,6 +40,13 @@ exports.postArea = (req, res) => {
     .get()
     .then(snapshot => {
       if (snapshot.empty) {
+        data.district = data.area[0].district || "";
+        data.division = data.area[0].division || "";
+        data.regionName = data.area[0].regionName || "";
+        data.circleName = data.area[0].circleName || "";
+        data.taluk = data.area[0].taluk || "";
+        data.state = data.area[0].state || "";
+
         docRef
           .set(data)
           .then(() => {

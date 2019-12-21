@@ -11,11 +11,9 @@ exports.councillor = (req, res) => {
 
   let ministers = [];
   let councillorRef = db.collection("councillors");
-  let constituencyRef = councillorRef.where(
-    "constituency",
-    "==",
-    data.constituency
-  );
+  let constituencyRef = councillorRef
+    .where("constituency", "==", data.constituency)
+    .where("winner", "==", true);
 
   constituencyRef
     .get()
@@ -116,7 +114,9 @@ exports.mla = (req, res) => {
 
   let ministers = [];
   let mlaRef = db.collection("mlas");
-  let queryRef = mlaRef.where("constituency", "==", data.constituency);
+  let queryRef = mlaRef
+    .where("constituency", "==", data.constituency)
+    .where("winner", "==", true);
 
   queryRef
     .get()
@@ -205,7 +205,9 @@ exports.mp = (req, res) => {
 
   let ministers = [];
   let mpRef = db.collection("mps");
-  let queryRef = mpRef.where("constituency", "==", data.constituency);
+  let queryRef = mpRef
+    .where("constituency", "==", data.constituency)
+    .where("winner", "==", true);
 
   queryRef
     .get()

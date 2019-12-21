@@ -4,17 +4,17 @@ const { db } = require("../utils/admin");
 process.on("message", type => {
   googleSheet("1sgh4yVQ2gEIKmMBFuSq-eUDt4MFV0tklnz322-d_G3s", type).then(
     ministers => {
-      let ministerRef = db.collection(type);
+      let ministerRef = db.collection("ministers");
       ministers.map(minister => {
-        let winnerBoolen = "";
+        let winnerBoolen = false;
         if (minister[2] == "TRUE") winnerBoolen = true;
-        else winnerBoolen = false;
 
+        let ministerUserName = minister[0].replace(/ /g, "-");
         let data = {
           createdAt: new Date().toISOString(),
           name: minister[0],
           constituency: minister[1],
-          winner: winnerBoolen || "",
+          winner: winnerBoolen,
           year: minister[3] || "",
           type: minister[4] || "",
           party: minister[5] || "",
@@ -27,7 +27,8 @@ process.on("message", type => {
           address: minister[12] || "",
           state: minister[13] || "",
           pincode: minister[14] || "",
-          photoUrl: minister[15] || ""
+          photoUrl: minister[15] || "",
+          userName: ministerUserName
         };
 
         ministerRef
@@ -38,15 +39,13 @@ process.on("message", type => {
           .then(snapshot => {
             if (!snapshot.empty) {
               console.log(
-                `${data.name}, ${data.constituency}, ${year} This Constituency already had minister.`
+                `${data.name}, ${data.constituency}, ${data.year} This Constituency already had minister.`
               );
             } else {
+              let docRef = ministerRef.doc();
+              data.id = docRef.id;
               ministerRef.add(data).then(ref => {
-                let uid = ref.id;
-                ministerRef.doc(uid).update({
-                  uid: uid
-                });
-                console.log("Added document with ID: ", uid, data.name);
+                console.log("Added document with ID: ", ref.id, data.name);
               });
             }
           })

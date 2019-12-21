@@ -76,6 +76,7 @@ const { electionYears } = require("./routes/elections");
 
 // Cron Jobs
 const {
+  cronMinister,
   cronCouncillors,
   cronMlas,
   cronMps,
@@ -86,7 +87,7 @@ const {
 const { getPoll, postPoll } = require("./routes/polls");
 
 // Pages
-const { getProfile, getHome } = require("./routes/pages");
+const { getProfile, getHome, getMinister } = require("./routes/pages");
 
 //****************************************************************/
 // ** API Request here*/
@@ -148,6 +149,7 @@ app.post("/state-zones", stateZones);
 app.post("/add-area", postArea);
 
 // Cron Jobs
+app.post("/add-ministers", cronMinister);
 app.post("/add-councillors", cronCouncillors);
 app.post("/add-mlas", cronMlas);
 app.post("/add-mps", cronMps);
@@ -160,3 +162,4 @@ app.post("/add-poll", postPoll);
 // ProfilePage
 app.post("/page-profile", getProfile);
 app.post("/page-home", getHome);
+app.post("/page-minister", getMinister);

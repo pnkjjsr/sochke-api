@@ -267,3 +267,51 @@ exports.getHome = (req, res) => {
       return res.status(404).json(err);
     });
 };
+
+exports.getMinister = (req, res) => {
+  const { db } = require("../../utils/admin");
+
+  const data = {
+    userName: req.body.userName
+  };
+
+  let colRef = db.collection("ministers");
+  let queryRef = colRef.where("userName", "==", data.userName);
+  let pageData = {};
+  let transaction = db
+    .runTransaction(t => {
+      return t.get(queryRef).then(snapshot => {
+        let mData = {};
+        if (snapshot.empty) {
+          pageData = {
+            status: "done",
+            code: "minister/empty",
+            message: "No minister with this name."
+          };
+        } else {
+          snapshot.forEach(doc => {
+            mData = doc.data();
+            pageData = doc.data();
+          });
+        }
+
+        let constituencyRef = db
+          .collection("constituencies")
+          .where("pincode", "==", mData.constituency)
+          .get()
+          .then(snapshot => {
+            snapshot.forEach(doc => {
+              pageData.constituencyArea = doc.data();
+            });
+          });
+
+        return Promise.all([constituencyRef]);
+      });
+    })
+    .then(() => {
+      return res.json(pageData);
+    })
+    .catch(err => {
+      res.status(404).json(err);
+    });
+};
