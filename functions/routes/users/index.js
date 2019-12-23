@@ -358,8 +358,14 @@ exports.verifyPassword = (req, res) => {
           message: "There is no user, Signout the website."
         });
       } else {
+        var base64 = require("base-64");
+        var utf8 = require("utf8");
+
         let uData = doc.data();
-        if (data.password == uData.password) {
+        let encoded = uData.password;
+        let bytes = base64.decode(encoded);
+        let decodedPassword = utf8.decode(bytes);
+        if (data.password == decodedPassword) {
           res.json({
             code: "password/match",
             status: "done",
