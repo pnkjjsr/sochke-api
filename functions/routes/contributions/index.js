@@ -9,10 +9,12 @@ exports.contribution = (req, res) => {
   let colRef = db.collection("contributions");
   let queryRef = colRef
     .where("constituency", "==", data.constituency)
-    .limit(10);
+    .limit(25);
   let contData = {
-    contributions: []
+    contributions: [],
+    contributionVoted: []
   };
+  let checkVoted = [];
   let transaction = db.runTransaction(t => {
     return t
       .get(queryRef)
@@ -28,11 +30,28 @@ exports.contribution = (req, res) => {
         snapshot.forEach(doc => {
           let cData = doc.data();
           contData.contributions.push(cData);
+          checkVoted.push(cData.id);
         });
       })
       .then(() => {
-        return res.status(200).json(contData);
+        checkVoted.map(contId => {
+          db.collection("contributionVotes")
+            .where("uid", "==", data.uid)
+            .where("cid", "==", contId)
+            .get()
+            .then(snapshot => {
+              if (snapshot.empty) {
+                snapshot.forEach(doc => {
+                  contData.contributionVoted.push(doc.data());
+                });
+              }
+            })
+            .then(() => {
+              return res.status(200).json(contData);
+            });
+        });
       })
+
       .catch(err => {
         return res.status(404).json(err);
       });
