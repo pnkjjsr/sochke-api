@@ -90,7 +90,7 @@ const { getPoll, postPoll } = require("./routes/polls");
 const { getProfile, getHome, getMinister } = require("./routes/pages");
 
 // Contribution
-const { addContribution } = require("./routes/contributions");
+const { contribution, addContribution } = require("./routes/contributions");
 
 //****************************************************************/
 // ** API Request here*/
@@ -168,4 +168,5 @@ app.post("/page-home", getHome);
 app.post("/page-minister", getMinister);
 
 // Contributions
+app.post("/contribution", contribution);
 app.post("/add-contribution", addContribution);
