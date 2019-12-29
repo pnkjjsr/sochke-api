@@ -32,26 +32,27 @@ exports.contribution = (req, res) => {
           contData.contributions.push(cData);
           checkVoted.push(cData.id);
         });
-      })
-      .then(() => {
-        checkVoted.map(contId => {
+
+        let checkVoteRef = checkVoted.map(contId => {
           db.collection("contributionVotes")
             .where("uid", "==", data.uid)
             .where("cid", "==", contId)
             .get()
             .then(snapshot => {
-              if (snapshot.empty) {
-                snapshot.forEach(doc => {
-                  contData.contributionVoted.push(doc.data());
-                });
-              }
-            })
-            .then(() => {
-              return res.status(200).json(contData);
+              snapshot.forEach(doc => {
+                contData.contributionVoted.push(doc.data());
+                console.log(contData.contributionVoted);
+              });
             });
         });
-      })
 
+        return Promise.all([checkVoteRef]);
+      })
+      .then(() => {
+        console.log(contData.contributionVoted);
+
+        return res.status(200).json(contData);
+      })
       .catch(err => {
         return res.status(404).json(err);
       });
@@ -69,7 +70,8 @@ exports.addContribution = (req, res) => {
     title: req.body.title,
     description: req.body.description,
     imgUrl: req.body.imgUrl,
-    voteCount: 0,
+    voteTrueCount: 0,
+    voteFalseCount: 0,
     opinionCount: 0
   };
 
@@ -90,4 +92,78 @@ exports.addContribution = (req, res) => {
     .catch(err => {
       return res.status(404).json(err);
     });
+};
+
+exports.voteContribution = (req, res) => {
+  const { db } = require("../../utils/admin");
+
+  const data = {
+    createdAt: req.body.createdAt,
+    uid: req.body.uid,
+    cid: req.body.cid,
+    vote: req.body.vote
+  };
+
+  let colRef = db.collection("contributionVotes");
+  let queryRef = colRef
+    .where("uid", "==", data.uid)
+    .where("cid", "==", data.cid);
+
+  let transaction = db.runTransaction(t => {
+    return t
+      .get(queryRef)
+      .then(snapshot => {
+        if (snapshot.empty) {
+          let docRef = colRef.doc();
+          data.id = docRef.id;
+          docRef
+            .set(data)
+            .then(() => {
+              return res.status(201).json({
+                code: "contribution/voted",
+                message: "vote added on that contribution."
+              });
+            })
+            .catch(err => {
+              return res.status(404).json(err);
+            });
+        } else {
+          return res.status(208).json({
+            code: "contribution/already-voted",
+            message: "This user already voted on this contribution."
+          });
+        }
+
+        let getContribute = db
+          .collection("contributions")
+          .doc(data.cid)
+          .get()
+          .then(doc => {
+            let trueCount = doc.data().voteTrueCount;
+            let falseCount = doc.data().voteFalseCount;
+            updateContribution(trueCount, falseCount);
+          })
+          .catch(err => {
+            return res.status(404).json(err);
+          });
+
+        let contributionRef = db.collection("contributions").doc(data.cid);
+        let updateContribution = (t, f) => {
+          if (data.vote) {
+            contributionRef.update({
+              voteTrueCount: t + 1
+            });
+          } else {
+            contributionRef.update({
+              voteFalseCount: f + 1
+            });
+          }
+        };
+
+        return Promise.all([getContribute]);
+      })
+      .catch(err => {
+        return res.status(404).json(err);
+      });
+  });
 };
