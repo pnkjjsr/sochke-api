@@ -9,47 +9,58 @@ exports.contribution = (req, res) => {
   let colRef = db.collection("contributions");
   let queryRef = colRef
     .where("constituency", "==", data.constituency)
+    .orderBy("createdAt", "desc")
     .limit(25);
+
+  let emptyData = {};
   let contData = {
     contributions: [],
     contributionVoted: []
   };
+
   let checkVoted = [];
   let transaction = db.runTransaction(t => {
     return t
       .get(queryRef)
       .then(snapshot => {
         if (snapshot.empty) {
-          return res.status(204).json({
-            status: "done",
+          return (emptyData = "empty");
+        }
+
+        snapshot.forEach(doc => {
+          contData.contributions.push(doc.data());
+          checkVoted.push(doc.data().id);
+        });
+
+        let checkLoop = 0;
+        let checkVoteSize = checkVoted.length;
+
+        return new Promise((resolve, reject) => {
+          for (id of checkVoted) {
+            db.collection("contributionVotes")
+              .where("uid", "==", data.uid)
+              .where("cid", "==", id)
+              .get()
+              .then(snapshot => {
+                checkLoop++;
+                snapshot.forEach(doc => {
+                  contData.contributionVoted.push(doc.data().cid);
+                });
+
+                if (checkLoop == checkVoteSize) {
+                  resolve();
+                }
+              });
+          }
+        });
+      })
+      .then(() => {
+        if (emptyData == "empty") {
+          return res.status(200).json({
             code: "contribution/empty",
             message: "contribution not written in this constituency"
           });
         }
-
-        snapshot.forEach(doc => {
-          let cData = doc.data();
-          contData.contributions.push(cData);
-          checkVoted.push(cData.id);
-        });
-
-        let checkVoteRef = checkVoted.map(contId => {
-          db.collection("contributionVotes")
-            .where("uid", "==", data.uid)
-            .where("cid", "==", contId)
-            .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
-                contData.contributionVoted.push(doc.data());
-                console.log(contData.contributionVoted);
-              });
-            });
-        });
-
-        return Promise.all([checkVoteRef]);
-      })
-      .then(() => {
-        console.log(contData.contributionVoted);
 
         return res.status(200).json(contData);
       })
