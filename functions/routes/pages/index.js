@@ -4,6 +4,7 @@ exports.getHome = (req, res) => {
     uid: req.body.uid
   };
   let pageData = {
+    leaderCount: 0,
     responds: [],
     respondVoted: [],
     councillors: [],
@@ -26,12 +27,60 @@ exports.getHome = (req, res) => {
 
           snapshot.forEach(doc => {
             uData = doc.data();
-            pageData.userName = uData.userName;
-            pageData.displayName = uData.displayName;
-            pageData.photoURL = uData.photoURL;
-            pageData.area = uData.area;
-            pageData.pincode = uData.pincode;
           });
+
+          let allLeader = db
+            .collection("connections")
+            .where("uid", "==", uData.uid)
+            .get()
+            .then(snapshot => {
+              if (snapshot.empty) {
+                return (pageData.leaderCount = 0);
+              }
+              pageData.leaderCount = snapshot.size;
+
+              snapshot.forEach(doc => {
+                let lData = doc.data();
+                return new Promise((resolve, reject) => {
+                  db.collection("users")
+                    .doc(lData.lid)
+                    .get()
+                    .then(doc => {
+                      let userData = doc.data();
+                      let responderData = {
+                        userName: userData.userName,
+                        displayName: userData.displayName,
+                        photoURL: userData.photoURL,
+                        constituency: userData.area,
+                        pincode: userData.pincode
+                      };
+
+                      db.collection("responds")
+                        .where("uid", "==", lData.lid)
+                        .limit(25)
+                        .get()
+                        .then(snapshot => {
+                          snapshot.forEach(doc => {
+                            let respondData = doc.data();
+                            responderData.type = respondData.type;
+                            responderData.uid = respondData.uid;
+                            responderData.imageUrl = respondData.imageUrl;
+                            responderData.id = respondData.id;
+                            responderData.createdAt = respondData.createAt;
+                            responderData.opinionCount =
+                              respondData.opinionCount;
+                            responderData.respond = respondData.respond;
+                            responderData.voteCount = respondData.voteCount;
+
+                            pageData.responds.push(responderData);
+
+                            resolve();
+                          });
+                        });
+                    });
+                });
+              });
+            });
 
           let allRespond = db
             .collection("responds")
@@ -42,6 +91,12 @@ exports.getHome = (req, res) => {
             .then(snapshot => {
               snapshot.forEach(async doc => {
                 let snapData = doc.data();
+                snapData.userName = uData.userName;
+                snapData.displayName = uData.displayName;
+                snapData.photoURL = uData.photoURL;
+                snapData.area = uData.area;
+                snapData.pincode = uData.pincode;
+
                 pageData.responds.push(snapData);
                 checkVoted.push(snapData.id);
               });
@@ -138,6 +193,7 @@ exports.getHome = (req, res) => {
             });
 
           return Promise.all([
+            allLeader,
             allRespond,
             allCouncillor,
             allMla,
