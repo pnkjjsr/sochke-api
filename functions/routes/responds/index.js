@@ -139,7 +139,6 @@ exports.voteRespond = (req, res) => {
             snapshot.forEach(doc => {
               let voteData = doc.data();
               voteStatus = voteData.vote;
-              console.log(voteStatus);
 
               if (!voteData.vote) {
                 votesRef.doc(doc.id).update({

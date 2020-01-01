@@ -1,4 +1,164 @@
-// Get all respond
+exports.getHome = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    uid: req.body.uid
+  };
+  let pageData = {
+    responds: [],
+    respondVoted: [],
+    councillors: [],
+    mlas: [],
+    mps: [],
+    cms: [],
+    pms: [],
+    polls: []
+  };
+  let checkVoted = [];
+
+  let colRef = db.collection("users").where("uid", "==", data.uid);
+
+  let transaction = db
+    .runTransaction(t => {
+      return t
+        .get(colRef)
+        .then(snapshot => {
+          let uData;
+
+          snapshot.forEach(doc => {
+            uData = doc.data();
+            pageData.userName = uData.userName;
+            pageData.displayName = uData.displayName;
+            pageData.photoURL = uData.photoURL;
+            pageData.area = uData.area;
+            pageData.pincode = uData.pincode;
+          });
+
+          let allRespond = db
+            .collection("responds")
+            .where("uid", "==", uData.uid)
+            .orderBy("createdAt", "desc")
+            .limit(25)
+            .get()
+            .then(snapshot => {
+              snapshot.forEach(async doc => {
+                let snapData = doc.data();
+                pageData.responds.push(snapData);
+                checkVoted.push(snapData.id);
+              });
+
+              return new Promise((resolve, reject) => {
+                let checkLoop = 0;
+                let checkVoteSize = checkVoted.length;
+
+                for (id of checkVoted) {
+                  db.collection("respondVotes")
+                    .where("uid", "==", uData.uid)
+                    .where("rid", "==", id)
+                    .where("vote", "==", true)
+                    .get()
+                    .then(snapshot => {
+                      checkLoop++;
+                      snapshot.forEach(doc => {
+                        pageData.respondVoted.push(doc.data().rid);
+                      });
+
+                      if (checkLoop == checkVoteSize) {
+                        resolve();
+                      }
+                    });
+                }
+              });
+            });
+
+          let allCouncillor = db
+            .collection("councillors")
+            .where("constituency", "==", uData.pincode)
+            .get()
+            .then(snapshot => {
+              snapshot.forEach(doc => {
+                let snapData = doc.data();
+                pageData.councillors.push(snapData);
+              });
+            });
+
+          let allMla = db
+            .collection("mlas")
+            .where("constituency", "==", uData.pincode)
+            .get()
+            .then(snapshot => {
+              snapshot.forEach(doc => {
+                let snapData = doc.data();
+                pageData.mlas.push(snapData);
+              });
+            });
+
+          let allMp = db
+            .collection("mps")
+            .where("constituency", "==", uData.district)
+            .get()
+            .then(snapshot => {
+              snapshot.forEach(doc => {
+                let snapData = doc.data();
+                pageData.mps.push(snapData);
+              });
+            });
+
+          let allCm = db
+            .collection("cms")
+            .where("constituency", "==", uData.state)
+            .get()
+            .then(snapshot => {
+              snapshot.forEach(doc => {
+                let snapData = doc.data();
+                pageData.cms.push(snapData);
+              });
+            });
+
+          let allPm = db
+            .collection("pms")
+            .where("constituency", "==", uData.country)
+            .get()
+            .then(snapshot => {
+              snapshot.forEach(doc => {
+                let snapData = doc.data();
+                pageData.pms.push(snapData);
+              });
+            });
+
+          let allPoll = db
+            .collection("polls")
+            .where("state", "==", uData.state)
+            .limit(10)
+            .get()
+            .then(snapshot => {
+              snapshot.forEach(doc => {
+                let snapData = doc.data();
+                pageData.polls.push(snapData);
+              });
+            });
+
+          return Promise.all([
+            allRespond,
+            allCouncillor,
+            allMla,
+            allMp,
+            allCm,
+            allPm,
+            allPoll
+          ]);
+        })
+        .catch(err => {
+          return res.status(404).json(err);
+        });
+    })
+    .then(() => {
+      res.json(pageData);
+    })
+    .catch(err => {
+      return res.status(404).json(err);
+    });
+};
+
 exports.getProfile = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = {
@@ -128,143 +288,6 @@ exports.getProfile = (req, res) => {
     .catch(err => {
       console.log("Transaction failure:", err);
       res.status(404).json(err);
-    });
-};
-
-exports.getHome = (req, res) => {
-  const { db } = require("../../utils/admin");
-  const data = {
-    uid: req.body.uid
-  };
-
-  let pageData = {
-    responds: [],
-    councillors: [],
-    mlas: [],
-    mps: [],
-    cms: [],
-    pms: [],
-    polls: []
-  };
-
-  let colRef = db.collection("users").where("uid", "==", data.uid);
-
-  let transaction = db
-    .runTransaction(t => {
-      return t
-        .get(colRef)
-        .then(snapshot => {
-          let uData;
-
-          snapshot.forEach(doc => {
-            uData = doc.data();
-            pageData.userName = uData.userName;
-            pageData.displayName = uData.displayName;
-            pageData.photoURL = uData.photoURL;
-            pageData.area = uData.area;
-            pageData.pincode = uData.pincode;
-          });
-
-          let allRespond = db
-            .collection("responds")
-            .where("uid", "==", uData.uid)
-            .orderBy("createdAt", "desc")
-            .limit(25)
-            .get()
-            .then(snapshot => {
-              snapshot.forEach(async doc => {
-                let snapData = doc.data();
-                pageData.responds.push(snapData);
-              });
-            });
-
-          let allCouncillor = db
-            .collection("councillors")
-            .where("constituency", "==", uData.pincode)
-            .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
-                let snapData = doc.data();
-                pageData.councillors.push(snapData);
-              });
-            });
-
-          let allMla = db
-            .collection("mlas")
-            .where("constituency", "==", uData.pincode)
-            .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
-                let snapData = doc.data();
-                pageData.mlas.push(snapData);
-              });
-            });
-
-          let allMp = db
-            .collection("mps")
-            .where("constituency", "==", uData.district)
-            .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
-                let snapData = doc.data();
-                pageData.mps.push(snapData);
-              });
-            });
-
-          let allCm = db
-            .collection("cms")
-            .where("constituency", "==", uData.state)
-            .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
-                let snapData = doc.data();
-                pageData.cms.push(snapData);
-              });
-            });
-
-          let allPm = db
-            .collection("pms")
-            .where("constituency", "==", uData.country)
-            .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
-                let snapData = doc.data();
-                pageData.pms.push(snapData);
-              });
-            });
-
-          let allPoll = db
-            .collection("polls")
-            .where("state", "==", uData.state)
-            .limit(10)
-            .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
-                let snapData = doc.data();
-                pageData.polls.push(snapData);
-              });
-            });
-
-          return Promise.all([
-            allRespond,
-            allCouncillor,
-            allMla,
-            allMp,
-            allCm,
-            allPm,
-            allPoll
-          ]);
-        })
-        .catch(err => {
-          return res.status(404).json(err);
-        });
-    })
-    .then(() => {
-      res.json(pageData);
-    })
-    .catch(err => {
-      console.log("Transaction failure:", err);
-      return res.status(404).json(err);
     });
 };
 
