@@ -32,6 +32,7 @@ exports.getHome = (req, res) => {
           let allLeader = db
             .collection("connections")
             .where("uid", "==", uData.uid)
+            .limit(25)
             .get()
             .then(snapshot => {
               if (snapshot.empty) {
@@ -39,46 +40,52 @@ exports.getHome = (req, res) => {
               }
               pageData.leaderCount = snapshot.size;
 
-              snapshot.forEach(doc => {
-                let lData = doc.data();
-                return new Promise((resolve, reject) => {
+              return new Promise((resolve, reject) => {
+                let checkSize = pageData.leaderCount;
+                let checkLoop = 0;
+
+                for (doc of snapshot.docs) {
+                  let lData = doc.data();
+                  let responderData = {};
+                  checkLoop++;
+
                   db.collection("users")
                     .doc(lData.lid)
                     .get()
                     .then(doc => {
                       let userData = doc.data();
-                      let responderData = {
+                      responderData = {
                         userName: userData.userName,
                         displayName: userData.displayName,
                         photoURL: userData.photoURL,
                         constituency: userData.area,
                         pincode: userData.pincode
                       };
-
-                      db.collection("responds")
-                        .where("uid", "==", lData.lid)
-                        .limit(25)
-                        .get()
-                        .then(snapshot => {
-                          snapshot.forEach(doc => {
-                            let respondData = doc.data();
-                            responderData.type = respondData.type;
-                            responderData.uid = respondData.uid;
-                            responderData.imageUrl = respondData.imageUrl;
-                            responderData.id = respondData.id;
-                            responderData.createdAt = respondData.createAt;
-                            responderData.opinionCount =
-                              respondData.opinionCount;
-                            responderData.respond = respondData.respond;
-                            responderData.voteCount = respondData.voteCount;
-
-                            pageData.responds.push(responderData);
-
-                            resolve();
-                          });
-                        });
                     });
-                });
+
+                  db.collection("responds")
+                    .where("uid", "==", lData.lid)
+                    .limit(25)
+                    .get()
+                    .then(snapshot => {
+                      snapshot.forEach(doc => {
+                        let respondData = doc.data();
+                        responderData.type = respondData.type;
+                        responderData.uid = respondData.uid;
+                        responderData.imageUrl = respondData.imageUrl;
+                        responderData.id = respondData.id;
+                        responderData.createdAt = respondData.createAt;
+                        responderData.opinionCount = respondData.opinionCount;
+                        responderData.respond = respondData.respond;
+                        responderData.voteCount = respondData.voteCount;
+                        pageData.responds.push(responderData);
+                      });
+                    });
+
+                  if (checkSize == checkLoop) {
+                    resolve();
+                  }
+                }
               });
             });
 
@@ -98,30 +105,43 @@ exports.getHome = (req, res) => {
                 snapData.pincode = uData.pincode;
 
                 pageData.responds.push(snapData);
-                checkVoted.push(snapData.id);
+                // checkVoted.push(snapData.id);
               });
 
-              return new Promise((resolve, reject) => {
-                let checkLoop = 0;
-                let checkVoteSize = checkVoted.length;
+              // return new Promise((resolve, reject) => {
+              //   let checkLoop = 0;
+              //   let checkVoteSize = checkVoted.length;
 
-                for (id of checkVoted) {
-                  db.collection("respondVotes")
-                    .where("uid", "==", uData.uid)
-                    .where("rid", "==", id)
-                    .where("vote", "==", true)
-                    .get()
-                    .then(snapshot => {
-                      checkLoop++;
-                      snapshot.forEach(doc => {
-                        pageData.respondVoted.push(doc.data().rid);
-                      });
+              //   for (id of checkVoted) {
+              //     db.collection("respondVotes")
+              //       .where("uid", "==", uData.uid)
+              //       .where("rid", "==", id)
+              //       .where("vote", "==", true)
+              //       .get()
+              //       .then(snapshot => {
+              //         checkLoop++;
+              //         snapshot.forEach(doc => {
+              //           pageData.respondVoted.push(doc.data().rid);
+              //         });
 
-                      if (checkLoop == checkVoteSize) {
-                        resolve();
-                      }
-                    });
-                }
+              //         if (checkLoop == checkVoteSize) {
+              //           resolve();
+              //         }
+              //       });
+              //   }
+              // });
+            });
+
+          let allRespondVote = db
+            .collection("respondVotes")
+            .where("uid", "==", uData.uid)
+            .where("vote", "==", true)
+            .limit(50)
+            .get()
+            .then(snapshot => {
+              snapshot.forEach(doc => {
+                let voteData = doc.data();
+                pageData.respondVoted.push(voteData.rid);
               });
             });
 
@@ -195,6 +215,7 @@ exports.getHome = (req, res) => {
           return Promise.all([
             allLeader,
             allRespond,
+            allRespondVote,
             allCouncillor,
             allMla,
             allMp,
