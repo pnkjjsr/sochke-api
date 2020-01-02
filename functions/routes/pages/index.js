@@ -14,14 +14,16 @@ exports.getHome = (req, res) => {
     pms: [],
     polls: []
   };
-  let checkVoted = [];
+  let connectionData = [];
+  let leaderData = [];
+  let leaderRespondArr = [];
 
-  let colRef = db.collection("users").where("uid", "==", data.uid);
+  let userQuery = db.collection("users").where("uid", "==", data.uid);
 
   let transaction = db
     .runTransaction(t => {
       return t
-        .get(colRef)
+        .get(userQuery)
         .then(snapshot => {
           let uData;
 
@@ -29,65 +31,97 @@ exports.getHome = (req, res) => {
             uData = doc.data();
           });
 
-          let allLeader = db
+          let allLeaderConnection = db
             .collection("connections")
             .where("uid", "==", uData.uid)
-            .limit(25)
+            .where("believe", "==", true)
             .get()
             .then(snapshot => {
+              pageData.leaderCount = snapshot.size;
+
               if (snapshot.empty) {
                 return (pageData.leaderCount = 0);
               }
-              pageData.leaderCount = snapshot.size;
 
-              return new Promise((resolve, reject) => {
-                let checkSize = pageData.leaderCount;
-                let checkLoop = 0;
+              snapshot.forEach(doc => {
+                let lData = doc.data();
+                connectionData.push(lData);
+              });
 
-                for (doc of snapshot.docs) {
-                  let lData = doc.data();
-                  let responderData = {};
-                  checkLoop++;
+              allLeaderData(connectionData);
+            });
 
-                  db.collection("users")
-                    .doc(lData.lid)
-                    .get()
-                    .then(doc => {
-                      let userData = doc.data();
-                      responderData = {
-                        userName: userData.userName,
-                        displayName: userData.displayName,
-                        photoURL: userData.photoURL,
-                        constituency: userData.area,
-                        pincode: userData.pincode
-                      };
+          let allLeaderData = leaders => {
+            return new Promise((resolve, reject) => {
+              let len = leaders.length;
+              let checkLen = 0;
+              leaders.map(data => {
+                db.collection("users")
+                  .doc(data.lid)
+                  .get()
+                  .then(doc => {
+                    let userData = doc.data();
+                    leaderData.push(userData);
+
+                    checkLen++;
+                    if (len == checkLen) {
+                      resolve();
+                    }
+                  });
+              });
+            }).then(() => {
+              allLeaderRespond(leaderData);
+            });
+          };
+
+          let allLeaderRespond = leaderData => {
+            return new Promise((resolve, reject) => {
+              let len = leaderData.length;
+              let checkLen = 0;
+
+              leaderData.map(data => {
+                db.collection("responds")
+                  .where("uid", "==", data.uid)
+                  .orderBy("createdAt", "desc")
+                  .limit(10)
+                  .get()
+                  .then(snapshot => {
+                    let respond = {};
+                    snapshot.forEach(doc => {
+                      let respondData = doc.data();
+
+                      respond.userName = data.userName;
+                      respond.displayName = data.displayName;
+                      respond.photoURL = data.photoURL;
+                      respond.constituency = data.area;
+                      respond.pincode = data.pincode;
+                      respond.type = respondData.type;
+                      respond.uid = respondData.uid;
+                      respond.imageUrl = respondData.imageUrl;
+                      respond.id = respondData.id;
+                      respond.createdAt = respondData.createAt;
+                      respond.opinionCount = respondData.opinionCount;
+                      respond.respond = respondData.respond;
+                      respond.voteCount = respondData.voteCount;
+
+                      leaderRespondArr.push(respond);
                     });
+                  });
 
-                  db.collection("responds")
-                    .where("uid", "==", lData.lid)
-                    .limit(25)
-                    .get()
-                    .then(snapshot => {
-                      snapshot.forEach(doc => {
-                        let respondData = doc.data();
-                        responderData.type = respondData.type;
-                        responderData.uid = respondData.uid;
-                        responderData.imageUrl = respondData.imageUrl;
-                        responderData.id = respondData.id;
-                        responderData.createdAt = respondData.createAt;
-                        responderData.opinionCount = respondData.opinionCount;
-                        responderData.respond = respondData.respond;
-                        responderData.voteCount = respondData.voteCount;
-                        pageData.responds.push(responderData);
-                      });
-                    });
-
-                  if (checkSize == checkLoop) {
-                    resolve();
-                  }
+                checkLen++;
+                if (len == checkLen) {
+                  resolve();
                 }
               });
+            }).then(() => {
+              // not working need to R&D on this
+              // mergeRespond(leaderRespondArr);
             });
+          };
+
+          // let mergeRespond = respond => {
+          //   console.log(respond);
+          // };
 
           let allRespond = db
             .collection("responds")
@@ -105,7 +139,6 @@ exports.getHome = (req, res) => {
                 snapData.pincode = uData.pincode;
 
                 pageData.responds.push(snapData);
-                // checkVoted.push(snapData.id);
               });
 
               // return new Promise((resolve, reject) => {
@@ -213,7 +246,7 @@ exports.getHome = (req, res) => {
             });
 
           return Promise.all([
-            allLeader,
+            allLeaderConnection,
             allRespond,
             allRespondVote,
             allCouncillor,

@@ -243,7 +243,7 @@ exports.opinion = (req, res) => {
   let queryRef = opinionRef
     .where("rid", "==", data.rid)
     .orderBy("createdAt", "desc")
-    .limit(10);
+    .limit(25);
 
   let getUser = snapshot => {
     if (snapshot.empty) {
@@ -315,5 +315,20 @@ exports.addOpinion = (req, res) => {
       code: "opinion/added",
       message: "Opinion added successfully"
     });
+  });
+
+  let updateRespond = db.collection("responds").doc(data.rid);
+  let transaction = db.runTransaction(t => {
+    return t
+      .get(updateRespond)
+      .then(doc => {
+        let opinionCount = doc.data().opinionCount;
+        let newOpinionCount = opinionCount + 1;
+
+        updateRespond.update({ opinionCount: newOpinionCount });
+      })
+      .catch(err => {
+        return res.status(404).json(err);
+      });
   });
 };
