@@ -8,10 +8,15 @@ exports.postPoll = (req, res) => {
     poll: req.body.poll
   };
 
-  let colRef = db.collection("pollResults");
-  let docRef = colRef.doc();
-  data.id = docRef.id;
-  docRef.set(data).then(() => {
+  let colRef = db
+    .collection("polls")
+    .doc(data.pid)
+    .collection("votes")
+    .doc(`${data.pid}_${data.uid}`);
+
+  data.id = `${data.pid}_${data.uid}`;
+
+  colRef.set(data).then(() => {
     return res.json({
       code: "poll/add",
       status: "done",
@@ -45,7 +50,7 @@ exports.getPoll = (req, res) => {
       await snapshot.forEach(doc => {
         let pData = doc.data();
         let pid = pData.id;
-        let colRef = db.collection("pollResults");
+        let colRef = db.collection("pollVotes");
         let query = colRef.where("uid", "==", data.uid).where("pid", "==", pid);
 
         query.get().then(snapshot => {

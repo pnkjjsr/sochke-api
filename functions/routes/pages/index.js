@@ -12,13 +12,14 @@ exports.getHome = (req, res) => {
     mps: [],
     cms: [],
     pms: [],
-    polls: []
+    polls: [],
+    pollVoted: []
   };
   let connectionData = [];
   let leaderData = [];
   let leaderRespondArr = [];
 
-  let userQuery = db.collection("users").where("uid", "==", data.uid);
+  let userQuery = db.collection("users").where("id", "==", data.uid);
 
   let transaction = db
     .runTransaction(t => {
@@ -33,22 +34,23 @@ exports.getHome = (req, res) => {
 
           let allLeaderConnection = db
             .collection("connections")
-            .where("uid", "==", uData.uid)
+            .where("uid", "==", uData.id)
             .where("believe", "==", true)
             .get()
             .then(snapshot => {
               pageData.leaderCount = snapshot.size;
 
-              if (snapshot.empty) {
-                return (pageData.leaderCount = 0);
+              if (!snapshot.empty) {
+                snapshot.forEach(doc => {
+                  let lData = doc.data();
+                  connectionData.push(lData);
+                });
+
+                allLeaderData(connectionData);
               }
-
-              snapshot.forEach(doc => {
-                let lData = doc.data();
-                connectionData.push(lData);
-              });
-
-              allLeaderData(connectionData);
+            })
+            .catch(err => {
+              return res.status(404).json(err);
             });
 
           let allLeaderData = leaders => {
@@ -69,9 +71,13 @@ exports.getHome = (req, res) => {
                     }
                   });
               });
-            }).then(() => {
-              allLeaderRespond(leaderData);
-            });
+            })
+              .then(() => {
+                allLeaderRespond(leaderData);
+              })
+              .catch(err => {
+                return res.status(404).json(err);
+              });
           };
 
           let allLeaderRespond = leaderData => {
@@ -113,10 +119,14 @@ exports.getHome = (req, res) => {
                   resolve();
                 }
               });
-            }).then(() => {
-              // not working need to R&D on this
-              // mergeRespond(leaderRespondArr);
-            });
+            })
+              .then(() => {
+                // not working need to R&D on this
+                // mergeRespond(leaderRespondArr);
+              })
+              .catch(err => {
+                return res.status(404).json(err);
+              });
           };
 
           // let mergeRespond = respond => {
@@ -125,7 +135,7 @@ exports.getHome = (req, res) => {
 
           let allRespond = db
             .collection("responds")
-            .where("uid", "==", uData.uid)
+            .where("uid", "==", uData.id)
             .orderBy("createdAt", "desc")
             .limit(25)
             .get()
@@ -140,34 +150,14 @@ exports.getHome = (req, res) => {
 
                 pageData.responds.push(snapData);
               });
-
-              // return new Promise((resolve, reject) => {
-              //   let checkLoop = 0;
-              //   let checkVoteSize = checkVoted.length;
-
-              //   for (id of checkVoted) {
-              //     db.collection("respondVotes")
-              //       .where("uid", "==", uData.uid)
-              //       .where("rid", "==", id)
-              //       .where("vote", "==", true)
-              //       .get()
-              //       .then(snapshot => {
-              //         checkLoop++;
-              //         snapshot.forEach(doc => {
-              //           pageData.respondVoted.push(doc.data().rid);
-              //         });
-
-              //         if (checkLoop == checkVoteSize) {
-              //           resolve();
-              //         }
-              //       });
-              //   }
-              // });
+            })
+            .catch(err => {
+              return res.status(404).json(err);
             });
 
           let allRespondVote = db
             .collection("respondVotes")
-            .where("uid", "==", uData.uid)
+            .where("uid", "==", uData.id)
             .where("vote", "==", true)
             .limit(50)
             .get()
@@ -176,32 +166,47 @@ exports.getHome = (req, res) => {
                 let voteData = doc.data();
                 pageData.respondVoted.push(voteData.rid);
               });
+            })
+            .catch(err => {
+              return res.status(404).json(err);
             });
 
           let allCouncillor = db
-            .collection("councillors")
-            .where("constituency", "==", uData.pincode)
+            .collection("ministers")
+            .where("type", "==", "COUNCILLOR")
+            .where("year", "==", "2017")
+            .where("constituency", "==", uData.constituency)
             .get()
             .then(snapshot => {
               snapshot.forEach(doc => {
                 let snapData = doc.data();
                 pageData.councillors.push(snapData);
               });
+            })
+            .catch(err => {
+              return res.status(404).json(err);
             });
 
           let allMla = db
-            .collection("mlas")
-            .where("constituency", "==", uData.pincode)
+            .collection("ministers")
+            .where("type", "==", "MLA")
+            .where("year", "==", "2015")
+            .where("constituency", "==", uData.constituency)
             .get()
             .then(snapshot => {
               snapshot.forEach(doc => {
                 let snapData = doc.data();
                 pageData.mlas.push(snapData);
               });
+            })
+            .catch(err => {
+              return res.status(404).json(err);
             });
 
           let allMp = db
-            .collection("mps")
+            .collection("ministers")
+            .where("type", "==", "MP")
+            .where("year", "==", "2019")
             .where("constituency", "==", uData.district)
             .get()
             .then(snapshot => {
@@ -209,10 +214,15 @@ exports.getHome = (req, res) => {
                 let snapData = doc.data();
                 pageData.mps.push(snapData);
               });
+            })
+            .catch(err => {
+              return res.status(404).json(err);
             });
 
           let allCm = db
-            .collection("cms")
+            .collection("ministers")
+            .where("type", "==", "CM")
+            .where("year", "==", "2015")
             .where("constituency", "==", uData.state)
             .get()
             .then(snapshot => {
@@ -220,29 +230,59 @@ exports.getHome = (req, res) => {
                 let snapData = doc.data();
                 pageData.cms.push(snapData);
               });
+            })
+            .catch(err => {
+              return res.status(404).json(err);
             });
 
           let allPm = db
-            .collection("pms")
-            .where("constituency", "==", uData.country)
+            .collection("ministers")
+            .where("type", "==", "PM")
+            .where("year", "==", "2019")
             .get()
             .then(snapshot => {
               snapshot.forEach(doc => {
                 let snapData = doc.data();
                 pageData.pms.push(snapData);
               });
+            })
+            .catch(err => {
+              return res.status(404).json(err);
             });
 
           let allPoll = db
             .collection("polls")
             .where("state", "==", uData.state)
-            .limit(10)
+            .orderBy("createdAt", "desc")
+            .limit(100)
             .get()
             .then(snapshot => {
               snapshot.forEach(doc => {
-                let snapData = doc.data();
-                pageData.polls.push(snapData);
+                let pollData = doc.data();
+                pageData.polls.push(pollData);
               });
+            })
+            .catch(err => {
+              return res.status(404).json(err);
+            });
+
+          let allVotedPoll = db
+            .collection("pollVotes")
+            .where("uid", "==", uData.id)
+            .where("poll", "==", true)
+            .orderBy("createdAt", "desc")
+            .limit(100)
+            .get()
+            .then(snapshot => {
+              if (!snapshot.empty) {
+                snapshot.forEach(doc => {
+                  let vData = doc.data();
+                  pageData.pollVoted.push(vData.pid);
+                });
+              }
+            })
+            .catch(err => {
+              return res.status(404).json(err);
             });
 
           return Promise.all([
@@ -254,8 +294,11 @@ exports.getHome = (req, res) => {
             allMp,
             allCm,
             allPm,
-            allPoll
-          ]);
+            allPoll,
+            allVotedPoll
+          ]).catch(err => {
+            return res.status(404).json(err);
+          });
         })
         .catch(err => {
           return res.status(404).json(err);

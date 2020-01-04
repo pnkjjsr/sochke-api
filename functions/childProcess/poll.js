@@ -1,16 +1,35 @@
 const { googleSheet } = require("../utils/sheet");
 const { db } = require("../utils/admin");
 
-process.on("message", type => {
-  googleSheet("1sgh4yVQ2gEIKmMBFuSq-eUDt4MFV0tklnz322-d_G3s", type).then(
+process.on("message", data => {
+  googleSheet("1sgh4yVQ2gEIKmMBFuSq-eUDt4MFV0tklnz322-d_G3s", data).then(
     sheeetData => {
-      sheeetData.map(row => {
-        console.log(row);
+      let colRef = db.collection("polls");
 
-        // let data = {
-        //   createdAt: new Date().toISOString(),
-        //   name: row[0]
-        // };
+      sheeetData.map(row => {
+        let data = {
+          createdAt: new Date().toISOString(),
+          question: row[0],
+          type: row[1],
+          pincode: row[2],
+          constituency: row[3],
+          district: row[4],
+          state: row[5],
+          country: row[6],
+          voteTrueCount: 0,
+          voteFalseCount: 0
+        };
+
+        let docRef = colRef.doc();
+        data.id = docRef.id;
+        colRef
+          .add(data)
+          .then(ref => {
+            console.log("Poll added: ", ref.id);
+          })
+          .catch(err => {
+            console.log(err);
+          });
       });
     }
   );
