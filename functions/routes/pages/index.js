@@ -50,7 +50,7 @@ exports.getHome = (req, res) => {
               }
             })
             .catch(err => {
-              return res.status(404).json(err);
+              console.log(err);
             });
 
           let allLeaderData = leaders => {
@@ -76,7 +76,7 @@ exports.getHome = (req, res) => {
                 allLeaderRespond(leaderData);
               })
               .catch(err => {
-                return res.status(404).json(err);
+                console.log(err);
               });
           };
 
@@ -125,7 +125,7 @@ exports.getHome = (req, res) => {
                 // mergeRespond(leaderRespondArr);
               })
               .catch(err => {
-                return res.status(404).json(err);
+                console.log(err);
               });
           };
 
@@ -152,7 +152,7 @@ exports.getHome = (req, res) => {
               });
             })
             .catch(err => {
-              return res.status(404).json(err);
+              console.log(err);
             });
 
           let allRespondVote = db
@@ -168,7 +168,7 @@ exports.getHome = (req, res) => {
               });
             })
             .catch(err => {
-              return res.status(404).json(err);
+              console.log(err);
             });
 
           let allCouncillor = db
@@ -184,7 +184,7 @@ exports.getHome = (req, res) => {
               });
             })
             .catch(err => {
-              return res.status(404).json(err);
+              console.log(err);
             });
 
           let allMla = db
@@ -200,7 +200,7 @@ exports.getHome = (req, res) => {
               });
             })
             .catch(err => {
-              return res.status(404).json(err);
+              console.log(err);
             });
 
           let allMp = db
@@ -216,7 +216,7 @@ exports.getHome = (req, res) => {
               });
             })
             .catch(err => {
-              return res.status(404).json(err);
+              console.log(err);
             });
 
           let allCm = db
@@ -232,7 +232,7 @@ exports.getHome = (req, res) => {
               });
             })
             .catch(err => {
-              return res.status(404).json(err);
+              console.log(err);
             });
 
           let allPm = db
@@ -247,7 +247,7 @@ exports.getHome = (req, res) => {
               });
             })
             .catch(err => {
-              return res.status(404).json(err);
+              console.log(err);
             });
 
           let allPoll = db
@@ -259,30 +259,20 @@ exports.getHome = (req, res) => {
             .then(snapshot => {
               snapshot.forEach(doc => {
                 let pollData = doc.data();
-                pageData.polls.push(pollData);
+                db.collection("polls")
+                  .doc(pollData.id)
+                  .collection("pollVotes")
+                  .doc(uData.id)
+                  .get()
+                  .then(doc => {
+                    if (!doc.exists) {
+                      pageData.polls.push(pollData);
+                    }
+                  });
               });
             })
             .catch(err => {
-              return res.status(404).json(err);
-            });
-
-          let allVotedPoll = db
-            .collection("pollVotes")
-            .where("uid", "==", uData.id)
-            .where("poll", "==", true)
-            .orderBy("createdAt", "desc")
-            .limit(100)
-            .get()
-            .then(snapshot => {
-              if (!snapshot.empty) {
-                snapshot.forEach(doc => {
-                  let vData = doc.data();
-                  pageData.pollVoted.push(vData.pid);
-                });
-              }
-            })
-            .catch(err => {
-              return res.status(404).json(err);
+              console.log(err);
             });
 
           return Promise.all([
@@ -294,10 +284,9 @@ exports.getHome = (req, res) => {
             allMp,
             allCm,
             allPm,
-            allPoll,
-            allVotedPoll
+            allPoll
           ]).catch(err => {
-            return res.status(404).json(err);
+            console.log(err);
           });
         })
         .catch(err => {

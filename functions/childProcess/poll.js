@@ -23,9 +23,10 @@ process.on("message", data => {
         let docRef = colRef.doc();
         data.id = docRef.id;
         colRef
-          .add(data)
+          .doc(data.id)
+          .set(data)
           .then(ref => {
-            console.log("Poll added: ", ref.id);
+            console.log("Poll added: ", data.id);
           })
           .catch(err => {
             console.log(err);

@@ -46,9 +46,12 @@ process.on("message", data => {
             } else {
               let docRef = colRef.doc();
               data.id = docRef.id;
-              colRef.add(data).then(ref => {
-                console.log("Added document with ID: ", ref.id, data.name);
-              });
+              colRef
+                .doc(data.id)
+                .set(data)
+                .then(ref => {
+                  console.log("Added document with ID: ", data.id, data.name);
+                });
             }
           })
           .catch(error => {

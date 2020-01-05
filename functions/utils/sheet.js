@@ -56,8 +56,8 @@ exports.googleSheet = (code, data) => {
         scope: SCOPES
       });
 
-      let sheetAuthCode = "";
-      // "4/ugE7npxPTkvB-puoQhniImCcmpYwCRegMxrIdH2OoXtMOrKuDJ4g3Tjw-JOhoZCUTdtmSh6-E3akWE9pOrkh0vw";
+      let sheetAuthCode =
+        "4/vAHonw7PmGYDPsJmBXRqq6CFTvkx2Xr2xVc9yGji51myyc351GhiExTKcobwsBs4F0FQFZg5SWMjgh3hzlqQDYk";
 
       if (!sheetAuthCode) {
         return console.log(

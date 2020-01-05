@@ -5,24 +5,54 @@ exports.postPoll = (req, res) => {
     createdAd: new Date().toISOString(),
     uid: req.body.uid,
     pid: req.body.pid,
-    poll: req.body.poll
+    vote: req.body.vote
   };
 
-  let colRef = db
-    .collection("polls")
-    .doc(data.pid)
-    .collection("votes")
-    .doc(`${data.pid}_${data.uid}`);
+  let colRef = db.collection("polls").doc(data.pid);
 
-  data.id = `${data.pid}_${data.uid}`;
+  let transaction = db
+    .runTransaction(t => {
+      return t.get(colRef).then(doc => {
+        let pollData = doc.data();
 
-  colRef.set(data).then(() => {
-    return res.json({
-      code: "poll/add",
-      status: "done",
-      message: "Poll answer added."
+        let updateCount = {};
+        if (data.vote) {
+          updateCount = {
+            voteTrueCount: pollData.voteTrueCount + 1
+          };
+        } else {
+          updateCount = {
+            voteFalseCount: pollData.voteFalseCount + 1
+          };
+        }
+        colRef.update(updateCount);
+
+        let voteData = {
+          createdAt: new Date().toISOString(),
+          id: data.uid,
+          pid: data.pid
+        };
+        let voted = db
+          .collection("polls")
+          .doc(data.pid)
+          .collection("pollVotes")
+          .doc(data.uid)
+          .set(voteData)
+          .then(() => {
+            console.log(`${data.uid} vote saved`);
+          });
+      });
+    })
+    .then(() => {
+      return res.json({
+        code: "poll/add",
+        status: "done",
+        message: "Poll answer added."
+      });
+    })
+    .catch(err => {
+      res.status(404).json(err);
     });
-  });
 };
 
 // Get Poll 1 by 1 with check if already Polled
