@@ -459,18 +459,6 @@ exports.getMinister = (req, res) => {
             pageData = doc.data();
           });
         }
-
-        let constituencyRef = db
-          .collection("constituencies")
-          .where("pincode", "==", mData.constituency)
-          .get()
-          .then(snapshot => {
-            snapshot.forEach(doc => {
-              pageData.constituencyArea = doc.data();
-            });
-          });
-
-        return Promise.all([constituencyRef]);
       });
     })
     .then(() => {
