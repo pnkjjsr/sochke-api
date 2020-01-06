@@ -331,7 +331,7 @@ exports.getProfile = (req, res) => {
         snapshot.forEach(doc => {
           uData = doc.data();
 
-          pageData.uid = uData.uid;
+          pageData.id = uData.id;
           pageData.userName = uData.userName;
           pageData.displayName = uData.displayName;
           pageData.photoURL = uData.photoURL;
@@ -343,7 +343,7 @@ exports.getProfile = (req, res) => {
 
         let respondCount = db
           .collection("responds")
-          .where("uid", "==", uData.uid)
+          .where("uid", "==", uData.id)
           .orderBy("createdAt", "desc")
           .limit(25)
           .get()
@@ -355,30 +355,39 @@ exports.getProfile = (req, res) => {
               let rData = doc.data();
               pageData.responds.push(rData);
             });
+          })
+          .catch(err => {
+            console.log(err);
           });
 
         let contributionRef = db
           .collection("contributions")
-          .where("uid", "==", uData.uid)
+          .where("uid", "==", uData.id)
           .get()
           .then(snapshot => {
             let contributionCount = snapshot.size;
             pageData.contributionCount = contributionCount;
+          })
+          .catch(err => {
+            console.log(err);
           });
 
         let respondMediaRef = db
           .collection("responds")
-          .where("uid", "==", uData.uid)
+          .where("uid", "==", uData.id)
           .where("type", "==", "media")
           .get()
           .then(snapshot => {
             let mediaCount = snapshot.size;
             pageData.mediaCount = mediaCount;
+          })
+          .catch(err => {
+            console.log(err);
           });
 
         let beliversRef = db
           .collection("connections")
-          .where("lid", "==", uData.uid)
+          .where("lid", "==", uData.id)
           .where("believe", "==", true)
           .get()
           .then(snapshot => {
@@ -386,11 +395,14 @@ exports.getProfile = (req, res) => {
               let believerData = doc.data();
               pageData.believers.push(believerData);
             });
+          })
+          .catch(err => {
+            console.log(err);
           });
 
         let leadersRef = db
           .collection("connections")
-          .where("uid", "==", uData.uid)
+          .where("uid", "==", uData.id)
           .where("believe", "==", true)
           .get()
           .then(snapshot => {
@@ -398,12 +410,15 @@ exports.getProfile = (req, res) => {
               let leaderData = doc.data();
               pageData.leaders.push(leaderData);
             });
+          })
+          .catch(err => {
+            console.log(err);
           });
 
         let believeRef = db
           .collection("connections")
           .where("uid", "==", data.uid)
-          .where("lid", "==", uData.uid)
+          .where("lid", "==", uData.id)
           .get()
           .then(snapshot => {
             if (snapshot.empty) {
@@ -412,6 +427,9 @@ exports.getProfile = (req, res) => {
             snapshot.forEach(doc => {
               pageData.believe = doc.data().believe;
             });
+          })
+          .catch(err => {
+            console.log(err);
           });
 
         return Promise.all([
@@ -421,9 +439,13 @@ exports.getProfile = (req, res) => {
           beliversRef,
           leadersRef,
           believeRef
-        ]).then(() => {
-          res.json(pageData);
-        });
+        ])
+          .then(() => {
+            res.json(pageData);
+          })
+          .catch(err => {
+            console.log(err);
+          });
       });
     })
 

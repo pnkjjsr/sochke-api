@@ -9,7 +9,9 @@ process.on("message", data => {
         let winnerBoolen = false;
         if (minister[2] == "TRUE") winnerBoolen = true;
 
-        let ministerUserName = minister[0].replace(/ /g, "-");
+        let ministerUserName = `${minister[0].replace(/ /g, "-")}-${
+          minister[4]
+        }-${minister[6]}-${minister[3]}`;
         let data = {
           createdAt: new Date().toISOString(),
           name: minister[0],
