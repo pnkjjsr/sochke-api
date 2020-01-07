@@ -90,58 +90,41 @@ exports.signup = (req, res) => {
     return res.status(400).json(errors);
   }
 
-  let queryRef = db.collection("users").where("email", "==", data.email);
+  db.collection("constituencies")
+    .where("area", "==", data.area)
+    .where("district", "==", data.district)
+    .get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        let cData = doc.data();
+        data.constituency = cData.constituency;
 
-  let transaction = db
-    .runTransaction(t => {
-      return t.get(queryRef).then(snapshot => {
-        if (!snapshot.empty) {
-          return res.status(400).json({
-            message: "Email already sign up with us."
-          });
-        }
-
-        let getConstituency = db
-          .collection("constituencies")
-          .where("area", "==", data.area)
-          .where("district", "==", data.district)
-          .get()
-          .then(snapshot => {
-            snapshot.forEach(doc => {
-              let cData = doc.data();
-
-              data.constituency = cData.constituency;
+        db.doc(`/users/${data.id}`)
+          .set(data)
+          .then(() => {
+            return res.status(201).json({
+              id: data.id,
+              email: data.email,
+              countryCode: "+91",
+              phoneNumber: data.mobile,
+              displayName: "",
+              photoURL: "",
+              constituency: data.constituency,
+              area: data.area,
+              district: data.district,
+              division: data.division,
+              state: data.state,
+              pincode: data.pincode,
+              country: data.country,
+              userName: userName,
+              leaderCount: 0,
+              believerCount: 0
             });
+          })
+          .catch(err => {
+            console.log(err);
           });
-
-        return Promise.all([getConstituency]);
       });
-    })
-    .then(() => {
-      db.doc(`/users/${data.id}`).set(data);
-
-      return res.status(201).json({
-        id: data.id,
-        email: data.email,
-        countryCode: "+91",
-        phoneNumber: data.mobile,
-        displayName: "",
-        photoURL: "",
-        constituency: data.constituency,
-        area: data.area,
-        district: data.district,
-        division: data.division,
-        state: data.state,
-        pincode: data.pincode,
-        country: data.country,
-        userName: userName,
-        leaderCount: 0,
-        believerCount: 0
-      });
-    })
-    .catch(err => {
-      console.log("Error getting documents", err);
-      return res.status(400).json(err);
     });
 };
 
