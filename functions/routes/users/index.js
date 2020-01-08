@@ -60,7 +60,7 @@ exports.login = (req, res) => {
 // Sign users up
 exports.signup = (req, res) => {
   const { db } = require("../../utils/admin");
-  let userName = req.body.email.match(/^(.+)@/)[1];
+  let userName = `${req.body.email.match(/^(.+)@/)[1]}-${req.body.uid}`;
   let data = {
     createdAt: new Date().toISOString(),
     id: req.body.uid,
