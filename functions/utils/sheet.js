@@ -1,10 +1,11 @@
 const fs = require("fs");
 const { google } = require("googleapis");
 
-exports.googleSheet = (code, type) => {
+exports.googleSheet = (code, data) => {
   return new Promise((resolve, reject) => {
     const sheetCode = code;
-    const sheetType = type;
+    const sheetType = data.sheetType;
+    const sheetRange = data.sheetRange;
 
     // If modifying these scopes, delete token.json.
     const SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"];
@@ -55,8 +56,8 @@ exports.googleSheet = (code, type) => {
         scope: SCOPES
       });
 
-      let sheetAuthCode = "";
-      // "4/ugE7npxPTkvB-puoQhniImCcmpYwCRegMxrIdH2OoXtMOrKuDJ4g3Tjw-JOhoZCUTdtmSh6-E3akWE9pOrkh0vw";
+      let sheetAuthCode =
+        "4/vAHVHt2rIco9gzusDVgo2lwDtx9TyGqLy4BnGZv_xmnrR6N_0IADGNSfrT0Ar9dlt-5djUwy4EEbkEeiJ7VjEps";
 
       if (!sheetAuthCode) {
         return console.log(
@@ -94,7 +95,7 @@ exports.googleSheet = (code, type) => {
       sheets.spreadsheets.values.get(
         {
           spreadsheetId: sheetCode,
-          range: `${sheetType}!A2:O`
+          range: `${sheetType}!${sheetRange}`
         },
         (err, res) => {
           if (err) return console.log("The API returned an error: " + err);

@@ -496,19 +496,18 @@ exports.ministerValue = (req, res) => {
   let trueVote = 0;
   let colRef = db.collection("ministerVotes");
   let query = colRef.where("mid", "==", data.mid);
+  let emptyData = {};
   query
     .get()
     .then(async snapshot => {
       if (snapshot.empty) {
-        return res.json({
+        return (emptyData = {
           code: "vote/empty",
-          status: "done",
           message: "This minister not voted yet."
         });
       }
 
       totalVote = snapshot.size;
-
       await snapshot.forEach(doc => {
         const vData = doc.data();
 
@@ -518,9 +517,11 @@ exports.ministerValue = (req, res) => {
       });
     })
     .then(() => {
+      if (emptyData.code == "vote/empty") {
+        return res.json(emptyData);
+      }
       return res.json({
         code: "vote/data",
-        status: "done",
         vote_total: totalVote,
         vote_true: trueVote
       });

@@ -32,12 +32,13 @@ exports.login = (req, res) => {
         let data = doc.data();
         delete data.password;
         return res.status(201).json({
-          uid: data.uid,
+          id: data.id,
           email: data.email,
           countryCode: data.countryCode,
           phoneNumber: data.mobile,
           displayName: data.displayName,
           photoURL: data.photoURL,
+          constituency: data.constituency,
           area: data.area,
           district: data.district,
           division: data.division,
@@ -60,9 +61,9 @@ exports.login = (req, res) => {
 exports.signup = (req, res) => {
   const { db } = require("../../utils/admin");
   let userName = req.body.email.match(/^(.+)@/)[1];
-  const newUser = {
+  let data = {
     createdAt: new Date().toISOString(),
-    uid: req.body.uid,
+    id: req.body.uid,
     userType: req.body.userType,
     email: req.body.email,
     emailVerified: false,
@@ -83,73 +84,47 @@ exports.signup = (req, res) => {
     believerCount: 0
   };
 
-  const { valid, errors } = validateSignupData(newUser);
+  const { valid, errors } = validateSignupData(data);
 
   if (!valid) {
     return res.status(400).json(errors);
   }
 
-  let userId = newUser.uid;
-
-  let usersRef = db.collection("users");
-  usersRef
-    .where("email", "==", newUser.email)
+  db.collection("constituencies")
+    .where("area", "==", data.area)
+    .where("district", "==", data.district)
     .get()
     .then(snapshot => {
-      if (!snapshot.empty) {
-        return res.status(400).json({
-          message: "Email already sign up with us."
-        });
-      } else {
-        db.doc(`/users/${userId}`)
-          .get()
-          .then(doc => {
-            if (doc.exists) {
-              return res.status(400).json({
-                handle: "this DOC is already taken"
-              });
-            } else {
-              db.doc(`/users/${userId}`).set(newUser);
-            }
-          })
+      snapshot.forEach(doc => {
+        let cData = doc.data();
+        data.constituency = cData.constituency;
+
+        db.doc(`/users/${data.id}`)
+          .set(data)
           .then(() => {
             return res.status(201).json({
-              status: "done",
-              code: "user/created",
-              message: "New user created and saved.",
-              data: {
-                uid: newUser.uid,
-                email: newUser.email,
-                countryCode: "+91",
-                phoneNumber: newUser.mobile,
-                displayName: "",
-                photoURL: "",
-                area: newUser.area,
-                district: newUser.district,
-                division: newUser.division,
-                state: newUser.state,
-                pincode: newUser.pincode,
-                country: newUser.country,
-                userName: userName,
-                leaderCount: 0,
-                believerCount: 0
-              }
+              id: data.id,
+              email: data.email,
+              countryCode: "+91",
+              phoneNumber: data.mobile,
+              displayName: "",
+              photoURL: "",
+              constituency: data.constituency,
+              area: data.area,
+              district: data.district,
+              division: data.division,
+              state: data.state,
+              pincode: data.pincode,
+              country: data.country,
+              userName: userName,
+              leaderCount: 0,
+              believerCount: 0
             });
           })
           .catch(err => {
-            if (err.code === "auth/email-already-in-use") {
-              return res.status(400).json({
-                email: "Email is already is use"
-              });
-            } else {
-              return res.status(500).json(err);
-            }
+            console.log(err);
           });
-      }
-    })
-    .catch(err => {
-      console.log("Error getting documents", err);
-      return res.status(400).json(err);
+      });
     });
 };
 

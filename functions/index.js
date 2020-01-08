@@ -69,7 +69,7 @@ const {
 const { party, addParty, editParty } = require("./routes/parties");
 
 // Locations Routes
-const { stateZones, postArea } = require("./routes/locations");
+const { stateZones, addPincodeArea } = require("./routes/locations");
 
 // Election routes
 const { electionYears } = require("./routes/elections");
@@ -77,10 +77,8 @@ const { electionYears } = require("./routes/elections");
 // Cron Jobs
 const {
   cronMinister,
-  cronCouncillors,
-  cronMlas,
-  cronMps,
-  cronPolls
+  cronPolls,
+  cronConstituencies
 } = require("./routes/crons");
 
 // Poll
@@ -153,14 +151,12 @@ app.post("/election-years", electionYears);
 
 // Locations
 app.post("/state-zones", stateZones);
-app.post("/add-area", postArea);
+app.post("/add-pincode-area", addPincodeArea);
 
 // Cron Jobs
 app.post("/add-ministers", cronMinister);
-app.post("/add-councillors", cronCouncillors);
-app.post("/add-mlas", cronMlas);
-app.post("/add-mps", cronMps);
 app.post("/add-polls", cronPolls);
+app.post("/add-constituencies", cronConstituencies);
 
 // Polls
 app.post("/poll", getPoll);

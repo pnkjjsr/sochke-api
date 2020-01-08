@@ -1,15 +1,17 @@
 const { googleSheet } = require("../utils/sheet");
 const { db } = require("../utils/admin");
 
-process.on("message", type => {
-  googleSheet("1sgh4yVQ2gEIKmMBFuSq-eUDt4MFV0tklnz322-d_G3s", type).then(
-    ministers => {
-      let ministerRef = db.collection("ministers");
-      ministers.map(minister => {
+process.on("message", data => {
+  googleSheet("1sgh4yVQ2gEIKmMBFuSq-eUDt4MFV0tklnz322-d_G3s", data).then(
+    sheetData => {
+      let colRef = db.collection("ministers");
+      sheetData.map(minister => {
         let winnerBoolen = false;
         if (minister[2] == "TRUE") winnerBoolen = true;
 
-        let ministerUserName = minister[0].replace(/ /g, "-");
+        let ministerUserName = `${minister[0].replace(/ /g, "-")}-${
+          minister[4]
+        }-${minister[6]}-${minister[3]}`;
         let data = {
           createdAt: new Date().toISOString(),
           name: minister[0],
@@ -28,25 +30,30 @@ process.on("message", type => {
           state: minister[13] || "",
           pincode: minister[14] || "",
           photoUrl: minister[15] || "",
-          userName: ministerUserName
+          userName: ministerUserName,
+          voteTrueCount: 0,
+          voteFalseCount: 0
         };
 
-        ministerRef
+        colRef
           .where("constituency", "==", data.constituency)
-          .where("name", "==", data.name)
+          .where("party", "==", data.party)
           .where("year", "==", data.year)
           .get()
           .then(snapshot => {
             if (!snapshot.empty) {
               console.log(
-                `${data.name}, ${data.constituency}, ${data.year} This Constituency already had minister.`
+                `${data.party}, ${data.constituency}, ${data.year} This Constituency already had minister.`
               );
             } else {
-              let docRef = ministerRef.doc();
+              let docRef = colRef.doc();
               data.id = docRef.id;
-              ministerRef.add(data).then(ref => {
-                console.log("Added document with ID: ", ref.id, data.name);
-              });
+              colRef
+                .doc(data.id)
+                .set(data)
+                .then(ref => {
+                  console.log("Added document with ID: ", data.id, data.name);
+                });
             }
           })
           .catch(error => {
