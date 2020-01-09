@@ -7,6 +7,7 @@ exports.getHome = (req, res) => {
     leaderCount: 0,
     responds: [],
     respondVoted: [],
+    contributions: [],
     councillors: [],
     mlas: [],
     mps: [],
@@ -45,6 +46,22 @@ exports.getHome = (req, res) => {
                 snapData.pincode = uData.pincode;
 
                 pageData.responds.push(snapData);
+              });
+            })
+            .catch(err => {
+              console.log(err);
+            });
+
+          let allContribution = db
+            .collection("contributions")
+            .where("uid", "==", uData.id)
+            .orderBy("createdAt", "desc")
+            .limit(25)
+            .get()
+            .then(snapshot => {
+              snapshot.forEach(async doc => {
+                let snapData = doc.data();
+                pageData.contributions.push(snapData);
               });
             })
             .catch(err => {
@@ -174,6 +191,7 @@ exports.getHome = (req, res) => {
           return Promise.all([
             allRespond,
             allRespondVote,
+            allContribution,
             allCouncillor,
             allMla,
             allMp,
@@ -205,6 +223,7 @@ exports.getProfile = (req, res) => {
 
   let pageData = {
     responds: [],
+    contributions: [],
     believers: [],
     leaders: []
   };
@@ -249,6 +268,22 @@ exports.getProfile = (req, res) => {
             snapshot.forEach(doc => {
               let rData = doc.data();
               pageData.responds.push(rData);
+            });
+          })
+          .catch(err => {
+            console.log(err);
+          });
+
+        let allContribution = db
+          .collection("contributions")
+          .where("uid", "==", uData.id)
+          .orderBy("createdAt", "desc")
+          .limit(25)
+          .get()
+          .then(snapshot => {
+            snapshot.forEach(async doc => {
+              let snapData = doc.data();
+              pageData.contributions.push(snapData);
             });
           })
           .catch(err => {
@@ -329,6 +364,7 @@ exports.getProfile = (req, res) => {
 
         return Promise.all([
           respondCount,
+          allContribution,
           contributionRef,
           respondMediaRef,
           beliversRef,
