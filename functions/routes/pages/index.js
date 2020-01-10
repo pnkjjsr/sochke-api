@@ -8,6 +8,7 @@ exports.getHome = (req, res) => {
     responds: [],
     respondVoted: [],
     contributions: [],
+    contributionCount: "",
     councillors: [],
     mlas: [],
     mps: [],
@@ -59,6 +60,8 @@ exports.getHome = (req, res) => {
             .limit(25)
             .get()
             .then(snapshot => {
+              pageData.contributionCount = snapshot.size;
+
               snapshot.forEach(async doc => {
                 let snapData = doc.data();
                 pageData.contributions.push(snapData);
