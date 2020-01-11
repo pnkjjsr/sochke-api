@@ -7,6 +7,8 @@ exports.getHome = (req, res) => {
     leaderCount: 0,
     responds: [],
     respondVoted: [],
+    contributions: [],
+    contributionCount: "",
     councillors: [],
     mlas: [],
     mps: [],
@@ -15,9 +17,6 @@ exports.getHome = (req, res) => {
     polls: [],
     pollVoted: []
   };
-  let connectionData = [];
-  let leaderData = [];
-  let leaderRespondArr = [];
 
   let userQuery = db.collection("users").where("id", "==", data.uid);
 
@@ -31,107 +30,6 @@ exports.getHome = (req, res) => {
           snapshot.forEach(doc => {
             uData = doc.data();
           });
-
-          let allLeaderConnection = db
-            .collection("connections")
-            .where("uid", "==", uData.id)
-            .where("believe", "==", true)
-            .get()
-            .then(snapshot => {
-              pageData.leaderCount = snapshot.size;
-
-              if (!snapshot.empty) {
-                snapshot.forEach(doc => {
-                  let lData = doc.data();
-                  connectionData.push(lData);
-                });
-
-                allLeaderData(connectionData);
-              }
-            })
-            .catch(err => {
-              console.log(err);
-            });
-
-          let allLeaderData = leaders => {
-            return new Promise((resolve, reject) => {
-              let len = leaders.length;
-              let checkLen = 0;
-              leaders.map(data => {
-                db.collection("users")
-                  .doc(data.lid)
-                  .get()
-                  .then(doc => {
-                    let userData = doc.data();
-                    leaderData.push(userData);
-
-                    checkLen++;
-                    if (len == checkLen) {
-                      resolve();
-                    }
-                  });
-              });
-            })
-              .then(() => {
-                allLeaderRespond(leaderData);
-              })
-              .catch(err => {
-                console.log(err);
-              });
-          };
-
-          let allLeaderRespond = leaderData => {
-            return new Promise((resolve, reject) => {
-              let len = leaderData.length;
-              let checkLen = 0;
-
-              leaderData.map(data => {
-                db.collection("responds")
-                  .where("uid", "==", data.uid)
-                  .orderBy("createdAt", "desc")
-                  .limit(10)
-                  .get()
-                  .then(snapshot => {
-                    let respond = {};
-                    snapshot.forEach(doc => {
-                      let respondData = doc.data();
-
-                      respond.userName = data.userName;
-                      respond.displayName = data.displayName;
-                      respond.photoURL = data.photoURL;
-                      respond.constituency = data.area;
-                      respond.pincode = data.pincode;
-                      respond.type = respondData.type;
-                      respond.uid = respondData.uid;
-                      respond.imageUrl = respondData.imageUrl;
-                      respond.id = respondData.id;
-                      respond.createdAt = respondData.createAt;
-                      respond.opinionCount = respondData.opinionCount;
-                      respond.respond = respondData.respond;
-                      respond.voteCount = respondData.voteCount;
-
-                      leaderRespondArr.push(respond);
-                    });
-                  });
-
-                checkLen++;
-                if (len == checkLen) {
-                  resolve();
-                }
-              });
-            })
-              .then(() => {
-                // not working need to R&D on this
-                // mergeRespond(leaderRespondArr);
-              })
-              .catch(err => {
-                console.log(err);
-              });
-          };
-
-          // let mergeRespond = respond => {
-          //   console.log(respond);
-          // };
 
           let allRespond = db
             .collection("responds")
@@ -149,6 +47,24 @@ exports.getHome = (req, res) => {
                 snapData.pincode = uData.pincode;
 
                 pageData.responds.push(snapData);
+              });
+            })
+            .catch(err => {
+              console.log(err);
+            });
+
+          let allContribution = db
+            .collection("contributions")
+            .where("uid", "==", uData.id)
+            .orderBy("createdAt", "desc")
+            .limit(25)
+            .get()
+            .then(snapshot => {
+              pageData.contributionCount = snapshot.size;
+
+              snapshot.forEach(async doc => {
+                let snapData = doc.data();
+                pageData.contributions.push(snapData);
               });
             })
             .catch(err => {
@@ -276,9 +192,9 @@ exports.getHome = (req, res) => {
             });
 
           return Promise.all([
-            allLeaderConnection,
             allRespond,
             allRespondVote,
+            allContribution,
             allCouncillor,
             allMla,
             allMp,
@@ -310,6 +226,7 @@ exports.getProfile = (req, res) => {
 
   let pageData = {
     responds: [],
+    contributions: [],
     believers: [],
     leaders: []
   };
@@ -354,6 +271,22 @@ exports.getProfile = (req, res) => {
             snapshot.forEach(doc => {
               let rData = doc.data();
               pageData.responds.push(rData);
+            });
+          })
+          .catch(err => {
+            console.log(err);
+          });
+
+        let allContribution = db
+          .collection("contributions")
+          .where("uid", "==", uData.id)
+          .orderBy("createdAt", "desc")
+          .limit(25)
+          .get()
+          .then(snapshot => {
+            snapshot.forEach(async doc => {
+              let snapData = doc.data();
+              pageData.contributions.push(snapData);
             });
           })
           .catch(err => {
@@ -434,6 +367,7 @@ exports.getProfile = (req, res) => {
 
         return Promise.all([
           respondCount,
+          allContribution,
           contributionRef,
           respondMediaRef,
           beliversRef,

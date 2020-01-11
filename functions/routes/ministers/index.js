@@ -437,11 +437,34 @@ exports.ministerVote = (req, res) => {
     vote: req.body.vote
   };
 
-  let colRef = db.collection("ministerVotes");
-  let docRef = colRef.doc();
-  data.id = docRef.id;
-  let setDoc = docRef
-    .set(data)
+  let colRef = db.collection("ministers").doc(data.mid);
+
+  let transaction = db
+    .runTransaction(t => {
+      return t
+        .get(colRef)
+        .then(doc => {
+          let mData = doc.data();
+
+          colRef
+            .collection("ministerVotes")
+            .doc(data.uid)
+            .set(data)
+            .then(() => {
+              console.log(`vote saved`);
+            })
+            .catch(err => {
+              console.log(err);
+            });
+
+          if (data.vote)
+            colRef.update({ voteTrueCount: mData.voteTrueCount + 1 });
+          else colRef.update({ voteFalseCount: mData.voteFalseCount + 1 });
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    })
     .then(() => {
       return res.json({
         code: "minister/vote",
@@ -461,23 +484,22 @@ exports.ministerVoted = (req, res) => {
     mid: req.body.mid
   };
 
-  colRef = db.collection("ministerVotes");
-  query = colRef.where("uid", "==", data.uid).where("mid", "==", data.mid);
-
-  query
+  colRef = db
+    .collection("ministers")
+    .doc(data.mid)
+    .collection("ministerVotes")
+    .doc(data.uid)
     .get()
-    .then(snapshot => {
-      if (snapshot.empty) {
+    .then(doc => {
+      if (!doc.exists) {
         return res.json({
           code: "vote/empty",
-          status: "done",
           message: "User never vote for this minister"
         });
       }
 
       return res.json({
         code: "vote/voted",
-        status: "done",
         message: "User already voted for this minister"
       });
     })

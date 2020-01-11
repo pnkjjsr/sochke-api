@@ -35,7 +35,7 @@ exports.login = (req, res) => {
           id: data.id,
           email: data.email,
           countryCode: data.countryCode,
-          phoneNumber: data.mobile,
+          phoneNumber: data.phoneNumber,
           displayName: data.displayName,
           photoURL: data.photoURL,
           constituency: data.constituency,
@@ -47,7 +47,10 @@ exports.login = (req, res) => {
           country: data.country,
           userName: data.userName,
           leaderCount: data.leaderCount,
-          believerCount: data.believerCount
+          believerCount: data.believerCount,
+          bio: data.bio,
+          dateOfBirth: data.dateOfBirth,
+          gender: data.gender
         });
       }
     })
@@ -60,7 +63,7 @@ exports.login = (req, res) => {
 // Sign users up
 exports.signup = (req, res) => {
   const { db } = require("../../utils/admin");
-  let userName = req.body.email.match(/^(.+)@/)[1];
+  let userName = `${req.body.email.match(/^(.+)@/)[1]}-${req.body.uid}`;
   let data = {
     createdAt: new Date().toISOString(),
     id: req.body.uid,
