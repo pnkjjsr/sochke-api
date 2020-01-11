@@ -35,7 +35,7 @@ exports.login = (req, res) => {
           id: data.id,
           email: data.email,
           countryCode: data.countryCode,
-          phoneNumber: data.mobile,
+          phoneNumber: data.phoneNumber,
           displayName: data.displayName,
           photoURL: data.photoURL,
           constituency: data.constituency,
@@ -47,7 +47,10 @@ exports.login = (req, res) => {
           country: data.country,
           userName: data.userName,
           leaderCount: data.leaderCount,
-          believerCount: data.believerCount
+          believerCount: data.believerCount,
+          bio: data.bio,
+          dateOfBirth: data.dateOfBirth,
+          gender: data.gender
         });
       }
     })
