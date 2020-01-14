@@ -32,7 +32,8 @@ process.on("message", data => {
           photoUrl: minister[15] || "",
           userName: ministerUserName,
           voteTrueCount: 0,
-          voteFalseCount: 0
+          voteFalseCount: 0,
+          believeCount: 0
         };
 
         colRef
