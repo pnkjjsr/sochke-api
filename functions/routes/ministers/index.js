@@ -589,8 +589,8 @@ exports.ministerConnection = (req, res) => {
 
           let currentCount = mData.believeCount;
 
-          if (data.believe) colRef.update({ believeCount: currentCount + 1 });
-          else colRef.update({ believeCount: currentCount - 1 });
+          if (data.believe) colRef.update({ believerCount: currentCount + 1 });
+          else colRef.update({ believerCount: currentCount - 1 });
         })
         .catch(err => {
           console.log(err);

@@ -6,7 +6,6 @@ exports.getHome = (req, res) => {
   let pageData = {
     leaderCount: 0,
     responds: [],
-    respondVoted: [],
     contributions: [],
     contributionCount: "",
     councillors: [],
@@ -14,8 +13,7 @@ exports.getHome = (req, res) => {
     mps: [],
     cms: [],
     pms: [],
-    polls: [],
-    pollVoted: []
+    polls: []
   };
 
   let userQuery = db.collection("users").where("id", "==", data.uid);
