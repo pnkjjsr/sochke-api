@@ -552,3 +552,54 @@ exports.ministerValue = (req, res) => {
       return res.status(404).json(err);
     });
 };
+
+exports.ministerConnection = (req, res) => {
+  const { db } = require("../../utils/admin");
+
+  const data = {
+    createdAt: req.body.createdAt,
+    uid: req.body.uid,
+    mid: req.body.mid,
+    believe: req.body.believe,
+    userName: req.body.userName,
+    displayName: req.body.displayName,
+    photoURL: req.body.photoURL
+  };
+
+  let colRef = db.collection("ministers").doc(data.mid);
+  let pageData = {};
+
+  let transaction = db
+    .runTransaction(t => {
+      return t
+        .get(colRef)
+        .then(doc => {
+          let mData = doc.data();
+
+          colRef
+            .collection("ministerConnections")
+            .doc(data.uid)
+            .set(data)
+            .then(() => {
+              console.log("connection added");
+            })
+            .catch(err => {
+              console.log(err);
+            });
+
+          let currentCount = mData.believeCount;
+
+          if (data.believe) colRef.update({ believeCount: currentCount + 1 });
+          else colRef.update({ believeCount: currentCount - 1 });
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    })
+    .then(() => {
+      return res.status(200).json(pageData);
+    })
+    .catch(err => {
+      return res.status(400).json(err);
+    });
+};

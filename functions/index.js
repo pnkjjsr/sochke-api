@@ -62,7 +62,8 @@ const {
   getConstituencyMinster,
   ministerVote,
   ministerVoted,
-  ministerValue
+  ministerValue,
+  ministerConnection
 } = require("./routes/ministers");
 
 // party routes
@@ -140,6 +141,7 @@ app.post("/constituency-minister", getConstituencyMinster);
 app.post("/minister-vote", ministerVote);
 app.post("/minister-voted", ministerVoted);
 app.post("/minister-value", ministerValue);
+app.post("/minister-connection", ministerConnection);
 
 // Party
 app.post("/party", party);
