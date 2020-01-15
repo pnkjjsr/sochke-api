@@ -446,7 +446,10 @@ exports.getUserDetails = (req, res) => {
     .get()
     .then(doc => {
       if (!doc.exists) {
-        return res.status(400).json(error);
+        return res.status(400).json({
+          code: "user/not-found",
+          message: "user not available."
+        });
       } else {
         let data = doc.data();
         return res.status(201).json(data);

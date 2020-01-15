@@ -97,14 +97,66 @@ exports.addRespond = (req, res) => {
     return res.status(400).json(errors);
   }
 
-  let respondsRef = db.collection("responds");
-  let newRespondRef = respondsRef.doc();
-  data.id = newRespondRef.id;
-  let setDoc = newRespondRef.set(data).then(ref => {
-    res.json({
+  let colRef = db.collection("responds");
+  let docRef = colRef.doc();
+  data.id = docRef.id;
+
+  docRef.set(data).then(ref => {
+    return res.json({
       message: "respond added successfully"
     });
   });
+
+  db.collection("connections")
+    .where("lid", "==", data.uid)
+    .where("believe", "==", true)
+    .get()
+    .then(snapshot => {
+      let beliverRef = db
+        .collection("responds")
+        .doc(data.id)
+        .collection("respondBelievers");
+
+      beliverRef
+        .doc(data.uid)
+        .set({
+          createdAt: new Date().toISOString(),
+          id: data.uid,
+          rid: data.id
+        })
+        .then(() => {
+          console.log(`${data.uid}, beliver set in respond`);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+
+      snapshot.forEach(doc => {
+        let cData = doc.data();
+
+        let beliverRef = db
+          .collection("responds")
+          .doc(data.id)
+          .collection("believers");
+
+        beliverRef
+          .doc(cData.uid)
+          .set({
+            createdAt: new Date().toISOString(),
+            id: cData.uid,
+            rid: data.id
+          })
+          .then(() => {
+            console.log(`${cData.uid}, beliver set in respond`);
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      });
+    })
+    .catch(err => {
+      console.log(err);
+    });
 };
 
 // Vote respond

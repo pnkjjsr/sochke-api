@@ -6,6 +6,7 @@ exports.getHome = (req, res) => {
   let pageData = {
     leaderCount: 0,
     responds: [],
+    respondVoted: [],
     contributions: [],
     contributionCount: "",
     councillors: [],
@@ -16,18 +17,38 @@ exports.getHome = (req, res) => {
     polls: []
   };
 
-  let userQuery = db.collection("users").where("id", "==", data.uid);
+  let colRef = db.collection("users").doc(data.uid);
 
   let transaction = db
     .runTransaction(t => {
       return t
-        .get(userQuery)
-        .then(snapshot => {
-          let uData;
+        .get(colRef)
+        .then(doc => {
+          let uData = doc.data();
 
-          snapshot.forEach(doc => {
-            uData = doc.data();
-          });
+          let timeline = db
+            .collectionGroup("respondBelievers")
+            .where("id", "==", data.uid)
+            .get()
+            .then(snapshot => {
+              snapshot.forEach(doc => {
+                let bData = doc.data();
+
+                db.collection("responds")
+                  .doc(bData.rid)
+                  .get()
+                  .then(doc => {
+                    let rData = doc.data();
+                    pageData.responds.push(rData);
+                  })
+                  .catch(err => {
+                    console.log(err);
+                  });
+              });
+            })
+            .catch(err => {
+              console.log(err);
+            });
 
           let allRespond = db
             .collection("responds")
@@ -190,6 +211,7 @@ exports.getHome = (req, res) => {
             });
 
           return Promise.all([
+            timeline,
             allRespond,
             allRespondVote,
             allContribution,
