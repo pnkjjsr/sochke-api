@@ -26,9 +26,11 @@ exports.getHome = (req, res) => {
         .then(doc => {
           let uData = doc.data();
 
-          let timeline = db
+          let allRespond = db
             .collectionGroup("respondBelievers")
             .where("id", "==", data.uid)
+            .orderBy("createdAt", "desc")
+            .limit(50)
             .get()
             .then(snapshot => {
               snapshot.forEach(doc => {
@@ -44,28 +46,6 @@ exports.getHome = (req, res) => {
                   .catch(err => {
                     console.log(err);
                   });
-              });
-            })
-            .catch(err => {
-              console.log(err);
-            });
-
-          let allRespond = db
-            .collection("responds")
-            .where("uid", "==", uData.id)
-            .orderBy("createdAt", "desc")
-            .limit(25)
-            .get()
-            .then(snapshot => {
-              snapshot.forEach(async doc => {
-                let snapData = doc.data();
-                snapData.userName = uData.userName;
-                snapData.displayName = uData.displayName;
-                snapData.photoURL = uData.photoURL;
-                snapData.area = uData.area;
-                snapData.pincode = uData.pincode;
-
-                pageData.responds.push(snapData);
               });
             })
             .catch(err => {
@@ -211,7 +191,6 @@ exports.getHome = (req, res) => {
             });
 
           return Promise.all([
-            timeline,
             allRespond,
             allRespondVote,
             allContribution,

@@ -88,7 +88,12 @@ exports.addRespond = (req, res) => {
     respond: req.body.respond,
     imageUrl: req.body.imageUrl || "",
     voteCount: req.body.voteCount,
-    opinionCount: req.body.opinionCount
+    opinionCount: req.body.opinionCount,
+    userName: req.body.userName,
+    displayName: req.body.displayName,
+    photoURL: req.body.photoURL,
+    constituency: req.body.constituency,
+    pincode: req.body.pincode
   };
 
   const { valid, errors } = validateRespond(data);
@@ -137,7 +142,7 @@ exports.addRespond = (req, res) => {
         let beliverRef = db
           .collection("responds")
           .doc(data.id)
-          .collection("believers");
+          .collection("respondBelievers");
 
         beliverRef
           .doc(cData.uid)
