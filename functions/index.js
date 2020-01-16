@@ -79,7 +79,8 @@ const { electionYears } = require("./routes/elections");
 const {
   cronMinister,
   cronPolls,
-  cronConstituencies
+  cronConstituencies,
+  cronAddMinisterPhoto
 } = require("./routes/crons");
 
 // Poll
@@ -159,6 +160,7 @@ app.post("/add-pincode-area", addPincodeArea);
 app.post("/add-ministers", cronMinister);
 app.post("/add-polls", cronPolls);
 app.post("/add-constituencies", cronConstituencies);
+app.post("/add-minister-photoURL", cronAddMinisterPhoto);
 
 // Polls
 app.post("/poll", getPoll);
