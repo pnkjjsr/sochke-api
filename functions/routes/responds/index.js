@@ -88,7 +88,12 @@ exports.addRespond = (req, res) => {
     respond: req.body.respond,
     imageUrl: req.body.imageUrl || "",
     voteCount: req.body.voteCount,
-    opinionCount: req.body.opinionCount
+    opinionCount: req.body.opinionCount,
+    userName: req.body.userName,
+    displayName: req.body.displayName,
+    photoURL: req.body.photoURL,
+    constituency: req.body.constituency,
+    pincode: req.body.pincode
   };
 
   const { valid, errors } = validateRespond(data);
@@ -97,14 +102,66 @@ exports.addRespond = (req, res) => {
     return res.status(400).json(errors);
   }
 
-  let respondsRef = db.collection("responds");
-  let newRespondRef = respondsRef.doc();
-  data.id = newRespondRef.id;
-  let setDoc = newRespondRef.set(data).then(ref => {
-    res.json({
+  let colRef = db.collection("responds");
+  let docRef = colRef.doc();
+  data.id = docRef.id;
+
+  docRef.set(data).then(ref => {
+    return res.json({
       message: "respond added successfully"
     });
   });
+
+  db.collection("connections")
+    .where("lid", "==", data.uid)
+    .where("believe", "==", true)
+    .get()
+    .then(snapshot => {
+      let beliverRef = db
+        .collection("responds")
+        .doc(data.id)
+        .collection("respondBelievers");
+
+      beliverRef
+        .doc(data.uid)
+        .set({
+          createdAt: new Date().toISOString(),
+          id: data.uid,
+          rid: data.id
+        })
+        .then(() => {
+          console.log(`${data.uid}, beliver set in respond`);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+
+      snapshot.forEach(doc => {
+        let cData = doc.data();
+
+        let beliverRef = db
+          .collection("responds")
+          .doc(data.id)
+          .collection("respondBelievers");
+
+        beliverRef
+          .doc(cData.uid)
+          .set({
+            createdAt: new Date().toISOString(),
+            id: cData.uid,
+            rid: data.id
+          })
+          .then(() => {
+            console.log(`${cData.uid}, beliver set in respond`);
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      });
+    })
+    .catch(err => {
+      console.log(err);
+    });
 };
 
 // Vote respond

@@ -33,7 +33,7 @@ process.on("message", data => {
           userName: ministerUserName,
           voteTrueCount: 0,
           voteFalseCount: 0,
-          believeCount: 0
+          believerCount: 0
         };
 
         colRef

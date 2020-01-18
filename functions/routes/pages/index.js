@@ -14,39 +14,38 @@ exports.getHome = (req, res) => {
     mps: [],
     cms: [],
     pms: [],
-    polls: [],
-    pollVoted: []
+    polls: []
   };
 
-  let userQuery = db.collection("users").where("id", "==", data.uid);
+  let colRef = db.collection("users").doc(data.uid);
 
   let transaction = db
     .runTransaction(t => {
       return t
-        .get(userQuery)
-        .then(snapshot => {
-          let uData;
-
-          snapshot.forEach(doc => {
-            uData = doc.data();
-          });
+        .get(colRef)
+        .then(doc => {
+          let uData = doc.data();
 
           let allRespond = db
-            .collection("responds")
-            .where("uid", "==", uData.id)
+            .collectionGroup("respondBelievers")
+            .where("id", "==", data.uid)
             .orderBy("createdAt", "desc")
-            .limit(25)
+            .limit(50)
             .get()
             .then(snapshot => {
-              snapshot.forEach(async doc => {
-                let snapData = doc.data();
-                snapData.userName = uData.userName;
-                snapData.displayName = uData.displayName;
-                snapData.photoURL = uData.photoURL;
-                snapData.area = uData.area;
-                snapData.pincode = uData.pincode;
+              snapshot.forEach(doc => {
+                let bData = doc.data();
 
-                pageData.responds.push(snapData);
+                db.collection("responds")
+                  .doc(bData.rid)
+                  .get()
+                  .then(doc => {
+                    let rData = doc.data();
+                    pageData.responds.push(rData);
+                  })
+                  .catch(err => {
+                    console.log(err);
+                  });
               });
             })
             .catch(err => {

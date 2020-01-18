@@ -44,3 +44,37 @@ exports.cronConstituencies = (req, res) => {
     message: "Cron run successfully."
   });
 };
+
+exports.cronAddMinisterPhoto = (req, res) => {
+  const { db } = require("../../utils/admin");
+
+  let colRef = db.collection("ministers");
+  colRef
+    .get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        let mData = doc.data();
+        let data = {
+          photoUrl: `https://firebasestorage.googleapis.com/v0/b/sochke-dev.appspot.com/o/images%2Fministers%2F${mData.name}.gif?alt=media`
+        };
+
+        colRef
+          .doc(mData.id)
+          .update(data)
+          .then(() => {
+            console.log(`${mData.name}, photoUrl updated on DB.`);
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      });
+    })
+    .catch(err => {
+      console.log(err);
+    });
+
+  return res.status(200).send({
+    code: "ministers/updating",
+    message: "Minister update cron running successfully."
+  });
+};
