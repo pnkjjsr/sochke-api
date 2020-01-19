@@ -32,7 +32,7 @@ exports.addPincodeArea = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = req.body;
 
-  let colRef = db.collection("constituencyArea");
+  let colRef = db.collection("constituencyAreas");
   let docRef = colRef.doc();
   data.id = docRef.id;
   let query = colRef.where("pincode", "==", data.pincode);
