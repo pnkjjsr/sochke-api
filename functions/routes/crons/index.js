@@ -68,6 +68,8 @@ exports.cronAddMinisterPhoto = (req, res) => {
             console.log(err);
           });
       });
+
+      console.log("Cron Completed");
     })
     .catch(err => {
       console.log(err);

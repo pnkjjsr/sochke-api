@@ -426,6 +426,7 @@ exports.getMinister = (req, res) => {
         let constituencyMinister = colRef
           .where("type", "==", mData.type)
           .where("constituency", "==", data.constituency)
+          .where("year", "==", mData.year)
           // .where("state", "==", data.state)
           .get()
           .then(snapshot => {
