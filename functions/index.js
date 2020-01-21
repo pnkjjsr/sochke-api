@@ -9,7 +9,7 @@ const { checkIfAuthenticated } = require("./utils/middlewareFirebseJWT");
 //** ======================================================== */
 main.use(cors());
 main.use("/v1", app);
-exports.api = functions.https.onRequest(main);
+exports.api = functions.region("asia-east2").https.onRequest(main);
 
 app.use(checkIfAuthenticated);
 

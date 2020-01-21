@@ -99,6 +99,13 @@ exports.signup = (req, res) => {
     .get()
     .then(snapshot => {
       snapshot.forEach(doc => {
+        // if (snapshot.empty) {
+        //   return res.status(400).json({
+        //     code: "constituency/not-available",
+        //     message: "We are not available in your State right now."
+        //   });
+        // }
+
         let cData = doc.data();
         data.constituency = cData.constituency;
 

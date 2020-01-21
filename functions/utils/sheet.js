@@ -57,7 +57,7 @@ exports.googleSheet = (code, data) => {
       });
 
       let sheetAuthCode =
-        "4/vAHVHt2rIco9gzusDVgo2lwDtx9TyGqLy4BnGZv_xmnrR6N_0IADGNSfrT0Ar9dlt-5djUwy4EEbkEeiJ7VjEps";
+        "4/vgGBEu39zEBHSdj77nL33fEx-BFyZl9F3whQCfFw8OB35BTsJyyCxCQfbOYLYDTUaeeDrwL0znEKp-3W-EoYF7k";
 
       if (!sheetAuthCode) {
         return console.log(
