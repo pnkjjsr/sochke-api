@@ -392,10 +392,7 @@ exports.getMinister = (req, res) => {
   const { db } = require("../../utils/admin");
 
   const data = {
-    userName: req.body.ministerUserName,
-    constituency: req.body.constituency,
-    district: req.body.district,
-    state: req.body.state
+    userName: req.body.ministerUserName
   };
 
   let colRef = db.collection("ministers");
@@ -410,22 +407,23 @@ exports.getMinister = (req, res) => {
     .runTransaction(t => {
       return t.get(queryRef).then(snapshot => {
         let mData = {};
+
         if (snapshot.empty) {
           pageData = {
             status: "done",
             code: "minister/empty",
             message: "No minister with this name."
           };
-        } else {
-          snapshot.forEach(doc => {
-            mData = doc.data();
-            pageData.winnerMinister = doc.data();
-          });
         }
+
+        snapshot.forEach(doc => {
+          mData = doc.data();
+          pageData.winnerMinister = doc.data();
+        });
 
         let constituencyMinister = colRef
           .where("type", "==", mData.type)
-          .where("constituency", "==", data.constituency)
+          .where("constituency", "==", mData.constituency)
           .where("year", "==", mData.year)
           // .where("state", "==", data.state)
           .get()
