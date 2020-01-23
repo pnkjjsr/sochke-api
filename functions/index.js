@@ -34,6 +34,7 @@ const {
   verifyPhone,
   registeredEmail,
   verifyPassword,
+  updatePassword,
   believe,
   rethink
 } = require("./routes/users");
@@ -117,6 +118,7 @@ app.post("/phone", updatePhone);
 app.post("/verifyPhone", verifyPhone);
 app.post("/registered-email", registeredEmail);
 app.post("/verify-password", verifyPassword);
+app.post("/update-password", updatePassword);
 app.post("/i-believe", believe);
 app.post("/rethink", rethink);
 

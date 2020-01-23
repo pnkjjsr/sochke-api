@@ -364,6 +364,29 @@ exports.verifyPassword = (req, res) => {
     });
 };
 
+exports.updatePassword = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    id: req.body.uid,
+    password: req.body.password
+  };
+
+  db.collection("users")
+    .doc(data.id)
+    .update({
+      password: data.password
+    })
+    .then(() => {
+      return res.status(201).json({
+        code: "auth/password-update",
+        message: "User password update successfully."
+      });
+    })
+    .catch(err => {
+      return res.status(400).json(err);
+    });
+};
+
 exports.logout = (req, res) => {
   firebase.initializeApp(config);
   firebase
@@ -714,6 +737,7 @@ exports.believe = (req, res) => {
             .set(data)
             .then(() => {
               connectionUpdate();
+              respondUpdate();
 
               return res.json({
                 status: "done",
@@ -737,6 +761,7 @@ exports.believe = (req, res) => {
             .update(updateData)
             .then(() => {
               connectionUpdate();
+              respondUpdate();
 
               return res.json({
                 status: "done",
@@ -765,6 +790,35 @@ exports.believe = (req, res) => {
               usersRef
                 .doc(data.lid)
                 .update({ believerCount: newBelieverCount });
+            });
+        };
+
+        let respondUpdate = () => {
+          let respondColRef = db.collection("responds");
+
+          respondColRef
+            .where("uid", "==", data.lid)
+            .get()
+            .then(snapshot => {
+              snapshot.forEach(doc => {
+                let respondData = doc.data();
+
+                let docRef = respondColRef
+                  .doc(respondData.id)
+                  .collection("respondBelievers")
+                  .doc(data.uid)
+                  .set({
+                    createdAt: new Date().toISOString(),
+                    id: data.uid,
+                    rid: respondData.id
+                  })
+                  .then(() => {
+                    console.log("All respond update with this believer.");
+                  });
+              });
+            })
+            .catch(err => {
+              console.log(err);
             });
         };
       })
