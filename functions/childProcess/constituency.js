@@ -17,7 +17,7 @@ process.on("message", data => {
 
         colRef
           .where("area", "==", data.area)
-          .where("state", "==", data.district)
+          .where("pincode", "==", data.pincode)
           .get()
           .then(snapshot => {
             if (!snapshot.empty) {

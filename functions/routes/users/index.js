@@ -88,27 +88,18 @@ exports.signup = (req, res) => {
   };
 
   const { valid, errors } = validateSignupData(data);
-
   if (!valid) {
     return res.status(400).json(errors);
   }
 
   db.collection("constituencies")
     .where("area", "==", data.area)
-    .where("district", "==", data.district)
+    .where("pincode", "==", data.pincode)
     .get()
     .then(snapshot => {
       snapshot.forEach(doc => {
-        // if (snapshot.empty) {
-        //   return res.status(400).json({
-        //     code: "constituency/not-available",
-        //     message: "We are not available in your State right now."
-        //   });
-        // }
-
         let cData = doc.data();
         data.constituency = cData.constituency;
-
         db.doc(`/users/${data.id}`)
           .set(data)
           .then(() => {
