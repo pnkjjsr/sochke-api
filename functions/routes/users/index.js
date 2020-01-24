@@ -88,27 +88,18 @@ exports.signup = (req, res) => {
   };
 
   const { valid, errors } = validateSignupData(data);
-
   if (!valid) {
     return res.status(400).json(errors);
   }
 
   db.collection("constituencies")
     .where("area", "==", data.area)
-    .where("district", "==", data.district)
+    .where("pincode", "==", data.pincode)
     .get()
     .then(snapshot => {
       snapshot.forEach(doc => {
-        // if (snapshot.empty) {
-        //   return res.status(400).json({
-        //     code: "constituency/not-available",
-        //     message: "We are not available in your State right now."
-        //   });
-        // }
-
         let cData = doc.data();
         data.constituency = cData.constituency;
-
         db.doc(`/users/${data.id}`)
           .set(data)
           .then(() => {
@@ -370,6 +361,29 @@ exports.verifyPassword = (req, res) => {
     })
     .catch(error => {
       return res.status(400).json(error);
+    });
+};
+
+exports.updatePassword = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    id: req.body.uid,
+    password: req.body.password
+  };
+
+  db.collection("users")
+    .doc(data.id)
+    .update({
+      password: data.password
+    })
+    .then(() => {
+      return res.status(201).json({
+        code: "auth/password-update",
+        message: "User password update successfully."
+      });
+    })
+    .catch(err => {
+      return res.status(400).json(err);
     });
 };
 
@@ -723,6 +737,7 @@ exports.believe = (req, res) => {
             .set(data)
             .then(() => {
               connectionUpdate();
+              respondUpdate();
 
               return res.json({
                 status: "done",
@@ -746,6 +761,7 @@ exports.believe = (req, res) => {
             .update(updateData)
             .then(() => {
               connectionUpdate();
+              respondUpdate();
 
               return res.json({
                 status: "done",
@@ -774,6 +790,35 @@ exports.believe = (req, res) => {
               usersRef
                 .doc(data.lid)
                 .update({ believerCount: newBelieverCount });
+            });
+        };
+
+        let respondUpdate = () => {
+          let respondColRef = db.collection("responds");
+
+          respondColRef
+            .where("uid", "==", data.lid)
+            .get()
+            .then(snapshot => {
+              snapshot.forEach(doc => {
+                let respondData = doc.data();
+
+                let docRef = respondColRef
+                  .doc(respondData.id)
+                  .collection("respondBelievers")
+                  .doc(data.uid)
+                  .set({
+                    createdAt: new Date().toISOString(),
+                    id: data.uid,
+                    rid: respondData.id
+                  })
+                  .then(() => {
+                    console.log("All respond update with this believer.");
+                  });
+              });
+            })
+            .catch(err => {
+              console.log(err);
             });
         };
       })
