@@ -98,7 +98,8 @@ exports.signup = (req, res) => {
     .get()
     .then(snapshot => {
       if (snapshot.empty) {
-        outsideDelhi(data.area);
+        data.constituency = data.area;
+        return outsideDelhi(data.constituency);
       }
       snapshot.forEach(doc => {
         let cData = doc.data();
