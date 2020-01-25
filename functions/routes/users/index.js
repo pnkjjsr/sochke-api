@@ -97,39 +97,47 @@ exports.signup = (req, res) => {
     .where("pincode", "==", data.pincode)
     .get()
     .then(snapshot => {
+      if (snapshot.empty) {
+        data.constituency = data.area;
+        return register(data.constituency);
+      }
       snapshot.forEach(doc => {
         let cData = doc.data();
         data.constituency = cData.constituency;
-        db.doc(`/users/${data.id}`)
-          .set(data)
-          .then(() => {
-            return res.status(201).json({
-              id: data.id,
-              email: data.email,
-              countryCode: "+91",
-              phoneNumber: data.mobile,
-              displayName: "",
-              photoURL: "",
-              constituency: data.constituency,
-              area: data.area,
-              district: data.district,
-              division: data.division,
-              state: data.state,
-              pincode: data.pincode,
-              country: data.country,
-              userName: userName,
-              leaderCount: 0,
-              believerCount: 0
-            });
-          })
-          .catch(err => {
-            console.log(err);
-          });
+        register(data.constituency);
       });
     })
     .catch(err => {
       console.log(err);
     });
+
+  let register = e => {
+    db.doc(`/users/${data.id}`)
+      .set(data)
+      .then(() => {
+        return res.status(201).json({
+          id: data.id,
+          email: data.email,
+          countryCode: "+91",
+          phoneNumber: data.mobile,
+          displayName: "",
+          photoURL: "",
+          constituency: e,
+          area: data.area,
+          district: data.district,
+          division: data.division,
+          state: data.state,
+          pincode: data.pincode,
+          country: data.country,
+          userName: userName,
+          leaderCount: 0,
+          believerCount: 0
+        });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
 };
 
 // Get all respond
