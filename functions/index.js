@@ -36,7 +36,8 @@ const {
   verifyPassword,
   updatePassword,
   believe,
-  rethink
+  rethink,
+  postFeedback
 } = require("./routes/users");
 
 // respond routes
@@ -121,6 +122,7 @@ app.post("/verify-password", verifyPassword);
 app.post("/update-password", updatePassword);
 app.post("/i-believe", believe);
 app.post("/rethink", rethink);
+app.post("/post-feedback", postFeedback);
 
 // Responds Routes
 app.post("/respond", respond);
