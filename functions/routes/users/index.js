@@ -892,3 +892,29 @@ exports.rethink = (req, res) => {
       });
   });
 };
+
+exports.postFeedback = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    createdAt: new Date().toISOString(),
+    path: req.body.path,
+    type: req.body.type,
+    title: req.body.title,
+    describe: req.body.describe
+  };
+
+  let docRef = db.collection("feedbacks").doc();
+  data.id = docRef.id;
+
+  docRef
+    .set(data)
+    .then(() => {
+      return res.status(201).json({
+        code: "feedback/create",
+        message: "Feedback saved in databse successfully."
+      });
+    })
+    .catch(err => {
+      return res.status(400).json(err);
+    });
+};
