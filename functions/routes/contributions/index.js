@@ -3,7 +3,7 @@ exports.contribution = (req, res) => {
   const data = {
     uid: req.body.uid,
     constituency: req.body.constituency,
-    district: req.body.district
+    pincode: req.body.pincode
   };
 
   let contributionRef = db
