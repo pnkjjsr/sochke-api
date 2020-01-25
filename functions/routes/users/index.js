@@ -99,19 +99,19 @@ exports.signup = (req, res) => {
     .then(snapshot => {
       if (snapshot.empty) {
         data.constituency = data.area;
-        return outsideDelhi(data.constituency);
+        return register(data.constituency);
       }
       snapshot.forEach(doc => {
         let cData = doc.data();
         data.constituency = cData.constituency;
-        outsideDelhi(data.constituency);
+        register(data.constituency);
       });
     })
     .catch(err => {
       console.log(err);
     });
 
-  let outsideDelhi = e => {
+  let register = e => {
     db.doc(`/users/${data.id}`)
       .set(data)
       .then(() => {
