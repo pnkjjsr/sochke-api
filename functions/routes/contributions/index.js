@@ -3,12 +3,14 @@ exports.contribution = (req, res) => {
   const data = {
     uid: req.body.uid,
     constituency: req.body.constituency,
-    pincode: req.body.pincode
+    pincode: req.body.pincode,
+    state: req.body.state
   };
 
   let contributionRef = db
     .collection("contributions")
-    .where("constituency", "==", data.constituency)
+    // .where("constituency", "==", data.constituency)
+    .where("state", "==", data.state)
     .orderBy("createdAt", "desc")
     .limit(50);
 
