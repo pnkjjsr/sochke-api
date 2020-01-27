@@ -82,7 +82,9 @@ const {
   cronMinister,
   cronPolls,
   cronConstituencies,
-  cronAddMinisterPhoto
+  cronAddMinisterPhoto,
+  cronUpdateUserSearchTag,
+  cronUpdateMinisterSearchTag
 } = require("./routes/crons");
 
 // Poll
@@ -97,6 +99,9 @@ const {
   addContribution,
   voteContribution
 } = require("./routes/contributions");
+
+// Search
+const { search } = require("./routes/search");
 
 //****************************************************************/
 // ** API Request here*/
@@ -165,6 +170,8 @@ app.post("/add-ministers", cronMinister);
 app.post("/add-polls", cronPolls);
 app.post("/add-constituencies", cronConstituencies);
 app.post("/add-minister-photoURL", cronAddMinisterPhoto);
+app.post("/update-user-searchTags", cronUpdateUserSearchTag);
+app.post("/update-minister-searchTags", cronUpdateMinisterSearchTag);
 
 // Polls
 app.post("/poll", getPoll);
@@ -179,3 +186,6 @@ app.post("/page-minister", getMinister);
 app.post("/contribution", contribution);
 app.post("/add-contribution", addContribution);
 app.post("/vote-contribution", voteContribution);
+
+// Search
+app.post("/search", search);

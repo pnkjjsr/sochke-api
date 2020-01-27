@@ -80,3 +80,74 @@ exports.cronAddMinisterPhoto = (req, res) => {
     message: "Minister update cron running successfully."
   });
 };
+
+exports.cronUpdateUserSearchTag = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const { createTagArr } = require("./utils");
+
+  let colRef = db.collection("users");
+
+  colRef
+    .get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        let uData = doc.data();
+        let words = uData.displayName;
+        let wordArr = createTagArr(words);
+
+        let len = wordArr[0].length;
+
+        if (!len) return;
+        colRef
+          .doc(uData.id)
+          .update({ searchTags: wordArr })
+          .then(() => {
+            console.log(`${uData.displayName}, updated.`);
+          });
+      });
+
+      res.json({
+        code: "user/updating",
+        message: "User search tags updating."
+      });
+    })
+    .catch(err => {
+      res.status(400).json(err);
+    });
+};
+
+exports.cronUpdateMinisterSearchTag = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const { createTagArr } = require("./utils");
+
+  let colRef = db.collection("ministers");
+
+  colRef
+    .get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        let mData = doc.data();
+        let words = mData.name;
+        let wordArr = createTagArr(words);
+
+        let len = wordArr[0].length;
+
+        if (!len) return;
+
+        colRef
+          .doc(mData.id)
+          .update({ searchTags: wordArr })
+          .then(() => {
+            console.log(`${mData.name}, updated.`);
+          });
+      });
+
+      res.json({
+        code: "minister/updating",
+        message: "minister search tags updating."
+      });
+    })
+    .catch(err => {
+      res.status(400).json(err);
+    });
+};
