@@ -7,6 +7,7 @@ exports.getHome = (req, res) => {
     leaderCount: 0,
     responds: [],
     respondVoted: [],
+    respondPromoted: [],
     contributions: [],
     contributionCount: "",
     councillors: [],
@@ -46,6 +47,24 @@ exports.getHome = (req, res) => {
                   .catch(err => {
                     console.log(err);
                   });
+              });
+            })
+            .catch(err => {
+              console.log(err);
+            });
+
+          const { randomUID } = require("./utils.js");
+          let promotedUID = randomUID();
+          let promotedRespond = db
+            .collection("responds")
+            .where("uid", "==", promotedUID)
+            .get()
+            .then(snapshot => {
+              let i = 0;
+              snapshot.forEach(doc => {
+                let docData = doc.data();
+                if (!i) pageData.respondPromoted.push(docData);
+                i++;
               });
             })
             .catch(err => {
@@ -193,6 +212,7 @@ exports.getHome = (req, res) => {
           return Promise.all([
             allRespond,
             allRespondVote,
+            promotedRespond,
             allContribution,
             allCouncillor,
             allMla,
