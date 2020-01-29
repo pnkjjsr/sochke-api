@@ -1,5 +1,6 @@
 const { googleSheet } = require("../utils/sheet");
 const { db } = require("../utils/admin");
+const { createTagArr } = require("../routes/crons/utils");
 
 process.on("message", data => {
   googleSheet("1sgh4yVQ2gEIKmMBFuSq-eUDt4MFV0tklnz322-d_G3s", data).then(
@@ -12,6 +13,9 @@ process.on("message", data => {
         let ministerUserName = `${minister[0].replace(/ /g, "-")}-${
           minister[4]
         }-${minister[6]}-${minister[3]}`;
+
+        let searchTagsArr = createTagArr(minister[0]);
+
         let data = {
           createdAt: new Date().toISOString(),
           name: minister[0],
@@ -33,7 +37,8 @@ process.on("message", data => {
           userName: ministerUserName,
           voteTrueCount: 0,
           voteFalseCount: 0,
-          believerCount: 0
+          believerCount: 0,
+          searchTags: searchTagsArr
         };
 
         colRef
