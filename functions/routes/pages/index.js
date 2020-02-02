@@ -431,7 +431,11 @@ exports.getMinister = (req, res) => {
   const { db } = require("../../utils/admin");
 
   const data = {
-    userName: req.body.ministerUserName
+    userName: req.body.ministerUserName,
+    constituency: req.body.constituency,
+    district: req.body.district,
+    state: req.body.state,
+    uid: req.body.uid
   };
 
   let colRef = db.collection("ministers");
@@ -439,7 +443,8 @@ exports.getMinister = (req, res) => {
 
   let pageData = {
     winnerMinister: {},
-    ministers: []
+    ministers: [],
+    voted: false
   };
 
   let transaction = db
@@ -479,7 +484,7 @@ exports.getMinister = (req, res) => {
       });
     })
     .then(() => {
-      return res.json(pageData);
+      return res.status(200).json(pageData);
     })
     .catch(err => {
       res.status(404).json(err);

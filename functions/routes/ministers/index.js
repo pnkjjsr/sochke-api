@@ -582,6 +582,10 @@ exports.ministerConnection = (req, res) => {
             .set(data)
             .then(() => {
               console.log("connection added");
+              pageData = {
+                code: "minister/believe",
+                message: "Believe saved in minister"
+              };
             })
             .catch(err => {
               console.log(err);
