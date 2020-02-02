@@ -62,7 +62,7 @@ exports.cronAddMinisterPhoto = (req, res) => {
           .doc(mData.id)
           .update(data)
           .then(() => {
-            console.log(`${mData.name}, photoUrl updated on DB.`);
+            // console.log(`${mData.name}, photoUrl updated on DB.`);
           })
           .catch(err => {
             console.log(err);

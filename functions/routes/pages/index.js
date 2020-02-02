@@ -15,7 +15,8 @@ exports.getHome = (req, res) => {
     mps: [],
     cms: [],
     pms: [],
-    polls: []
+    polls: [],
+    currentCandidates: []
   };
 
   let colRef = db.collection("users").doc(data.uid);
@@ -26,6 +27,23 @@ exports.getHome = (req, res) => {
         .get(colRef)
         .then(doc => {
           let uData = doc.data();
+
+          let currectElection = db
+            .collection("ministers")
+            .where("type", "==", "MLA")
+            .where("year", "==", 2020)
+            .where("constituency", "==", uData.constituency)
+            .where("state", "==", "DELHI")
+            .get()
+            .then(snapshot => {
+              snapshot.forEach(doc => {
+                let cData = doc.data();
+                pageData.currentCandidates.push(cData);
+              });
+            })
+            .catch(err => {
+              console.log(err);
+            });
 
           let allRespond = db
             .collectionGroup("respondBelievers")
@@ -108,7 +126,7 @@ exports.getHome = (req, res) => {
           let allCouncillor = db
             .collection("ministers")
             .where("type", "==", "COUNCILLOR")
-            .where("year", "==", "2017")
+            .where("year", "==", 2017)
             .where("constituency", "==", uData.constituency)
             .get()
             .then(snapshot => {
@@ -124,7 +142,7 @@ exports.getHome = (req, res) => {
           let allMla = db
             .collection("ministers")
             .where("type", "==", "MLA")
-            .where("year", "==", "2015")
+            .where("year", "==", 2015)
             .where("constituency", "==", uData.constituency)
             .get()
             .then(snapshot => {
@@ -140,7 +158,7 @@ exports.getHome = (req, res) => {
           let allMp = db
             .collection("ministers")
             .where("type", "==", "MP")
-            .where("year", "==", "2019")
+            .where("year", "==", 2019)
             .where("constituency", "==", uData.district)
             .get()
             .then(snapshot => {
@@ -156,7 +174,7 @@ exports.getHome = (req, res) => {
           let allCm = db
             .collection("ministers")
             .where("type", "==", "CM")
-            .where("year", "==", "2015")
+            .where("year", "==", 2015)
             .where("constituency", "==", uData.state)
             .get()
             .then(snapshot => {
@@ -172,7 +190,7 @@ exports.getHome = (req, res) => {
           let allPm = db
             .collection("ministers")
             .where("type", "==", "PM")
-            .where("year", "==", "2019")
+            .where("year", "==", 2019)
             .get()
             .then(snapshot => {
               snapshot.forEach(doc => {
@@ -210,6 +228,7 @@ exports.getHome = (req, res) => {
             });
 
           return Promise.all([
+            currectElection,
             allRespond,
             allRespondVote,
             promotedRespond,

@@ -21,7 +21,7 @@ process.on("message", data => {
           name: minister[0],
           constituency: minister[1],
           winner: winnerBoolen,
-          year: minister[3] || "",
+          year: parseInt(minister[3]) || "",
           type: minister[4] || "",
           party: minister[5] || "",
           partyShort: minister[6] || "",
@@ -58,7 +58,7 @@ process.on("message", data => {
                 .doc(data.id)
                 .set(data)
                 .then(ref => {
-                  console.log("Added document with ID: ", data.id, data.name);
+                  // console.log("Added document with ID: ", data.id, data.name);
                 });
             }
           })
