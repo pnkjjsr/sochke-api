@@ -440,13 +440,16 @@ exports.sendEmailVerification = (req, res) => {
 // Add user details
 exports.addUserDetails = (req, res) => {
   const { db } = require("../../utils/admin");
+  const { createTagArr } = require("../crons/utils");
+  let searchTagArr = createTagArr(req.body.displayName);
   let data = {
     uid: req.body.uid,
     displayName: req.body.displayName,
     bio: req.body.bio,
     dateOfBirth: req.body.dateOfBirth,
     phoneNumber: req.body.phoneNumber,
-    gender: req.body.gender
+    gender: req.body.gender,
+    searchTags: searchTagArr
   };
 
   const { valid, errors } = validateUserDetails(data);
@@ -689,9 +692,12 @@ exports.addUserPhoto = (req, res) => {
 
 exports.addUserName = (req, res) => {
   const { db } = require("../../utils/admin");
+  const { createTagArr } = require("../crons/utils");
+  let searchTagArr = createTagArr(req.body.displayName);
   let data = {
     uid: req.body.uid,
-    displayName: req.body.displayName
+    displayName: req.body.displayName,
+    searchTags: searchTagArr
   };
 
   const { valid, errors } = validateNameData(data);

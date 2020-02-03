@@ -7,6 +7,7 @@ exports.getHome = (req, res) => {
     leaderCount: 0,
     responds: [],
     respondVoted: [],
+    respondPromoted: [],
     contributions: [],
     contributionCount: "",
     councillors: [],
@@ -14,7 +15,8 @@ exports.getHome = (req, res) => {
     mps: [],
     cms: [],
     pms: [],
-    polls: []
+    polls: [],
+    currentCandidates: []
   };
 
   let colRef = db.collection("users").doc(data.uid);
@@ -25,6 +27,23 @@ exports.getHome = (req, res) => {
         .get(colRef)
         .then(doc => {
           let uData = doc.data();
+
+          let currectElection = db
+            .collection("ministers")
+            .where("type", "==", "MLA")
+            .where("year", "==", 2020)
+            .where("constituency", "==", uData.constituency)
+            .where("state", "==", "DELHI")
+            .get()
+            .then(snapshot => {
+              snapshot.forEach(doc => {
+                let cData = doc.data();
+                pageData.currentCandidates.push(cData);
+              });
+            })
+            .catch(err => {
+              console.log(err);
+            });
 
           let allRespond = db
             .collectionGroup("respondBelievers")
@@ -46,6 +65,24 @@ exports.getHome = (req, res) => {
                   .catch(err => {
                     console.log(err);
                   });
+              });
+            })
+            .catch(err => {
+              console.log(err);
+            });
+
+          const { randomUID } = require("./utils.js");
+          let promotedUID = randomUID();
+          let promotedRespond = db
+            .collection("responds")
+            .where("uid", "==", promotedUID)
+            .get()
+            .then(snapshot => {
+              let i = 0;
+              snapshot.forEach(doc => {
+                let docData = doc.data();
+                if (!i) pageData.respondPromoted.push(docData);
+                i++;
               });
             })
             .catch(err => {
@@ -89,7 +126,7 @@ exports.getHome = (req, res) => {
           let allCouncillor = db
             .collection("ministers")
             .where("type", "==", "COUNCILLOR")
-            .where("year", "==", "2017")
+            .where("year", "==", 2017)
             .where("constituency", "==", uData.constituency)
             .get()
             .then(snapshot => {
@@ -105,7 +142,7 @@ exports.getHome = (req, res) => {
           let allMla = db
             .collection("ministers")
             .where("type", "==", "MLA")
-            .where("year", "==", "2015")
+            .where("year", "==", 2015)
             .where("constituency", "==", uData.constituency)
             .get()
             .then(snapshot => {
@@ -121,7 +158,7 @@ exports.getHome = (req, res) => {
           let allMp = db
             .collection("ministers")
             .where("type", "==", "MP")
-            .where("year", "==", "2019")
+            .where("year", "==", 2019)
             .where("constituency", "==", uData.district)
             .get()
             .then(snapshot => {
@@ -137,7 +174,7 @@ exports.getHome = (req, res) => {
           let allCm = db
             .collection("ministers")
             .where("type", "==", "CM")
-            .where("year", "==", "2015")
+            .where("year", "==", 2015)
             .where("constituency", "==", uData.state)
             .get()
             .then(snapshot => {
@@ -153,7 +190,7 @@ exports.getHome = (req, res) => {
           let allPm = db
             .collection("ministers")
             .where("type", "==", "PM")
-            .where("year", "==", "2019")
+            .where("year", "==", 2019)
             .get()
             .then(snapshot => {
               snapshot.forEach(doc => {
@@ -191,8 +228,10 @@ exports.getHome = (req, res) => {
             });
 
           return Promise.all([
+            currectElection,
             allRespond,
             allRespondVote,
+            promotedRespond,
             allContribution,
             allCouncillor,
             allMla,
@@ -392,7 +431,11 @@ exports.getMinister = (req, res) => {
   const { db } = require("../../utils/admin");
 
   const data = {
-    userName: req.body.ministerUserName
+    userName: req.body.ministerUserName,
+    constituency: req.body.constituency,
+    district: req.body.district,
+    state: req.body.state,
+    uid: req.body.uid
   };
 
   let colRef = db.collection("ministers");
@@ -400,7 +443,8 @@ exports.getMinister = (req, res) => {
 
   let pageData = {
     winnerMinister: {},
-    ministers: []
+    ministers: [],
+    voted: false
   };
 
   let transaction = db
@@ -440,7 +484,7 @@ exports.getMinister = (req, res) => {
       });
     })
     .then(() => {
-      return res.json(pageData);
+      return res.status(200).json(pageData);
     })
     .catch(err => {
       res.status(404).json(err);

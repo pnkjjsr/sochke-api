@@ -15,7 +15,11 @@
     "shell": "firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "exportAuth": "firebase auth:export ./usersAuth.csv --format=CSV",
+    "importAuth": "firebase auth:import ./usersAuth.csv --hash-algo=SCRYPT --hash-key=FtPCyZlCnhdaV3ZkdbYUwMb+OSd3It+6GQAiPA5tQUNGZE+HVqt1QFFJiiqhgsOhON2iP38G4Of+sj+8llfmAg== --salt-separator=Bw== --rounds=8 --mem-cost=14",
+    "exportDatabase": "gcloud firestore export gs://sochke-dev.appspot.com --async",
+    "importDatabase": "gcloud firestore import gs://sochke-dev.appspot.com/2020-01-28T08:46:19_65928/"
   },
   "engines": {
     "node": "8"
