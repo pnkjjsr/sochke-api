@@ -3,7 +3,9 @@ exports.createTagArr = words => {
   let curName = "";
 
   words.split(" ").forEach(word => {
-    curName += ` ${word}`;
+    let lowerCase = word.toLowerCase();
+
+    curName += ` ${lowerCase}`;
     wordArr.push(curName.trim());
   });
 

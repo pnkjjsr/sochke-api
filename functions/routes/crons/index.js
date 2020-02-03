@@ -55,21 +55,19 @@ exports.cronAddMinisterPhoto = (req, res) => {
       snapshot.forEach(doc => {
         let mData = doc.data();
         let data = {
-          photoUrl: `https://firebasestorage.googleapis.com/v0/b/sochke-dev.appspot.com/o/images%2Fministers%2F${mData.name}.gif?alt=media`
+          photoUrl: `https://firebasestorage.googleapis.com/v0/b/sochke-test.appspot.com/o/images%2Fministers%2F${mData.name}.gif?alt=media`
         };
 
         colRef
           .doc(mData.id)
           .update(data)
           .then(() => {
-            console.log(`${mData.name}, photoUrl updated on DB.`);
+            // console.log(`${mData.name}, photoUrl updated on DB.`);
           })
           .catch(err => {
             console.log(err);
           });
       });
-
-      console.log("Cron Completed");
     })
     .catch(err => {
       console.log(err);
