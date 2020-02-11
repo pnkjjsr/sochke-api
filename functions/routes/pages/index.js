@@ -142,7 +142,7 @@ exports.getHome = (req, res) => {
           let allMla = db
             .collection("ministers")
             .where("type", "==", "MLA")
-            .where("year", "==", 2015)
+            .where("year", "==", 2020)
             .where("constituency", "==", uData.constituency)
             .get()
             .then(snapshot => {
