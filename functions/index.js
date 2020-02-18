@@ -58,6 +58,7 @@ const {
   addMla,
   mp,
   addMp,
+  ministers,
   minister,
   ministerType,
   editMinister,
@@ -144,7 +145,8 @@ app.post("/mla", mla);
 app.post("/add-mla", addMla);
 app.post("/mp", mp);
 app.post("/add-mp", addMp);
-app.post("/minister", minister);
+app.post("/ministers", ministers);
+app.post("/minister/:id", minister);
 app.post("/minister-type", ministerType);
 app.post("/edit-minister", editMinister);
 app.post("/constituency-minister", getConstituencyMinster);
