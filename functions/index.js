@@ -1,5 +1,6 @@
 const functions = require("firebase-functions");
 const app = require("express")();
+const admin = require("express")();
 const main = require("express")();
 const cors = require("cors");
 
@@ -10,19 +11,23 @@ const { checkIfAuthenticated } = require("./utils/middlewareFirebseJWT");
 main.use(cors());
 main.use("/v1", app);
 exports.api = functions.region("asia-east2").https.onRequest(main);
+exports.admin = functions.region("asia-east2").https.onRequest(main);
 
 app.use(checkIfAuthenticated);
+//** ======================================================== */
+//** ======================================================== */
 
-//** ======================================================== */
-//** ======================================================== */
+// Admin APIs
+const adminRoutes = require("./routesAdmin");
+app.post("/login", adminRoutes.login);
 
 // Test Hit
 const { postSession, test } = require("./routes/session");
+admin.post("/test", test);
 
 // user routes
 const {
   login,
-  adminLogin,
   signup,
   getLocation,
   updateLocation,
@@ -114,7 +119,6 @@ app.post("/test", test);
 
 // User routes
 app.post("/login", login);
-app.post("/adminLogin", adminLogin);
 app.post("/signup", signup);
 app.post("/location", updateLocation);
 app.post("/getLocation", getLocation);
