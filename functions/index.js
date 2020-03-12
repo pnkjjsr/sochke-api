@@ -22,6 +22,7 @@ const { postSession, test } = require("./routes/session");
 // user routes
 const {
   login,
+  adminLogin,
   signup,
   getLocation,
   updateLocation,
@@ -113,6 +114,7 @@ app.post("/test", test);
 
 // User routes
 app.post("/login", login);
+app.post("/adminLogin", adminLogin);
 app.post("/signup", signup);
 app.post("/location", updateLocation);
 app.post("/getLocation", getLocation);
