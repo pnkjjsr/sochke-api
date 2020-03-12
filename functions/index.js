@@ -19,11 +19,11 @@ app.use(checkIfAuthenticated);
 
 // Admin APIs
 const adminRoutes = require("./routesAdmin");
-app.post("/login", adminRoutes.login);
+app.post("/x-login", adminRoutes.login);
 
 // Test Hit
 const { postSession, test } = require("./routes/session");
-admin.post("/test", test);
+app.post("/test", test);
 
 // user routes
 const {
