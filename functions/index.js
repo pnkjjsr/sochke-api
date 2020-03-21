@@ -10,14 +10,21 @@ const { checkIfAuthenticated } = require("./utils/middlewareFirebseJWT");
 main.use(cors());
 main.use("/v1", app);
 exports.api = functions.region("asia-east2").https.onRequest(main);
-
 app.use(checkIfAuthenticated);
+//** ======================================================== */
+//** ======================================================== */
 
+//** Admin APIs */
+//** ======================================================== */
+const adminRoutes = require("./routesAdmin");
+app.post("/x-login", adminRoutes.login);
+app.post("/x-dashboard", adminRoutes.dashboard);
 //** ======================================================== */
 //** ======================================================== */
 
 // Test Hit
 const { postSession, test } = require("./routes/session");
+app.post("/test", test);
 
 // user routes
 const {
@@ -58,6 +65,7 @@ const {
   addMla,
   mp,
   addMp,
+  ministers,
   minister,
   ministerType,
   editMinister,
@@ -144,7 +152,8 @@ app.post("/mla", mla);
 app.post("/add-mla", addMla);
 app.post("/mp", mp);
 app.post("/add-mp", addMp);
-app.post("/minister", minister);
+app.post("/ministers", ministers);
+app.post("/minister/:id", minister);
 app.post("/minister-type", ministerType);
 app.post("/edit-minister", editMinister);
 app.post("/constituency-minister", getConstituencyMinster);

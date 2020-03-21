@@ -285,41 +285,44 @@ exports.addMp = (req, res) => {
     });
 };
 
-exports.minister = (req, res) => {
+exports.ministers = (req, res) => {
   const { db } = require("../../utils/admin");
-  const _res = res;
   let ministerData = [];
 
-  let councillorRef = db.collection("councillors").limit(5);
-  let mlasRef = db.collection("mlas").limit(5);
-  let mpsRef = db.collection("mps").limit(5);
+  let ministersRef = db
+    .collection("ministers")
+    .orderBy("createdAt", "desc")
+    .limit(50);
 
-  councillorRef
+  ministersRef
     .get()
-    .then(async councillors => {
-      await councillors.forEach(doc => {
+    .then(snapshot => {
+      snapshot.forEach(doc => {
         ministerData.push(doc.data());
       });
-    })
-    .then(async () => {
-      await mlasRef.get().then(mlas => {
-        mlas.forEach(doc => {
-          ministerData.push(doc.data());
-        });
-      });
-    })
-    .then(async () => {
-      await mpsRef.get().then(mps => {
-        mps.forEach(doc => {
-          ministerData.push(doc.data());
-        });
-      });
-    })
-    .then(async () => {
-      return _res.json(ministerData);
+
+      res.status(200).json(ministerData);
     })
     .catch(error => {
       return res.status(400).json(error);
+    });
+};
+
+exports.minister = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    id: req.params.id
+  };
+
+  db.collection("ministers")
+    .doc(data.id)
+    .get()
+    .then(doc => {
+      let userData = doc.data();
+      return res.status(200).json(userData);
+    })
+    .catch(err => {
+      return res.status(400).json(err);
     });
 };
 
