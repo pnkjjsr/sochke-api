@@ -4,6 +4,8 @@ exports.addContributePublic = (req, res) => {
 
   const data = {
     createdAt: req.body.createdAt,
+    uid: req.body.uid,
+    displayName: req.body.displayName,
     title: req.body.title,
     description: req.body.desc,
     imgUrl: req.body.imgUrl,
