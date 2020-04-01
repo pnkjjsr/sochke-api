@@ -8,11 +8,13 @@ const { dashboard } = require("./pages/dashboard");
 const { contributePublic } = require("./contributionPublic");
 const { contributePublicAll } = require("./contributionPublic");
 const { contributePublicAdd } = require("./contributionPublic");
+const { contributePublicUpdate } = require("./contributionPublic");
 
 module.exports = {
   login,
   dashboard,
   contributePublic,
   contributePublicAll,
-  contributePublicAdd
+  contributePublicAdd,
+  contributePublicUpdate
 };

@@ -22,6 +22,7 @@ app.post("/x-dashboard", adminRoutes.dashboard);
 app.get("/x-contributePublic", adminRoutes.contributePublicAll);
 app.get("/x-contributePublic/:id", adminRoutes.contributePublic);
 app.post("/x-contributionPublic-add", adminRoutes.contributePublicAdd);
+app.post("/x-contributionPublic-update", adminRoutes.contributePublicUpdate);
 
 //** ======================================================== */
 //** ======================================================== */

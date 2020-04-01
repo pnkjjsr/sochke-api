@@ -57,7 +57,7 @@ exports.contributePublicAdd = (req, res) => {
   const data = {
     createdAt: req.body.createdAt,
     uid: req.body.uid,
-    displayName: req.body.displayName,
+    postedBy: req.body.displayName,
     title: req.body.title,
     description: req.body.desc,
     imgUrl: req.body.imgUrl,
@@ -83,5 +83,33 @@ exports.contributePublicAdd = (req, res) => {
     })
     .catch(err => {
       return res.status(404).json(err);
+    });
+};
+
+exports.contributePublicUpdate = (req, res) => {
+  const { db } = require("../../utils/admin");
+
+  const data = {
+    id: req.body.id,
+    title: req.body.title,
+    description: req.body.description,
+    imgUrl: req.body.imgUrl,
+    uid: req.body.uid,
+    status: req.body.status == "true" ? true : false,
+    updatedAt: req.body.updatedAt
+  };
+
+  let colRef = db
+    .collection("contributionPublic")
+    .doc(data.id)
+    .update(data)
+    .then(() => {
+      return res.status(200).json({
+        code: "contribute-public/updated",
+        message: "Public contributed updated."
+      });
+    })
+    .catch(err => {
+      return res.status(400).json(err);
     });
 };
