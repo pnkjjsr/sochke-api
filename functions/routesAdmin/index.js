@@ -5,10 +5,14 @@ const { login } = require("./users");
 const { dashboard } = require("./pages/dashboard");
 
 // Contribute API
-const { addContributePublic } = require("./contributionPublic");
+const { contributePublic } = require("./contributionPublic");
+const { contributePublicAll } = require("./contributionPublic");
+const { contributePublicAdd } = require("./contributionPublic");
 
 module.exports = {
   login,
   dashboard,
-  addContributePublic
+  contributePublic,
+  contributePublicAll,
+  contributePublicAdd
 };

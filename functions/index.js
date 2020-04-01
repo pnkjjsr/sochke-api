@@ -19,7 +19,9 @@ app.use(checkIfAuthenticated);
 const adminRoutes = require("./routesAdmin");
 app.post("/x-login", adminRoutes.login);
 app.post("/x-dashboard", adminRoutes.dashboard);
-app.post("/x-contributionPublic-add", adminRoutes.addContributePublic);
+app.get("/x-contributePublic", adminRoutes.contributePublicAll);
+app.get("/x-contributePublic/:id", adminRoutes.contributePublic);
+app.post("/x-contributionPublic-add", adminRoutes.contributePublicAdd);
 
 //** ======================================================== */
 //** ======================================================== */
