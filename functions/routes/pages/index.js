@@ -490,3 +490,29 @@ exports.getMinister = (req, res) => {
       res.status(404).json(err);
     });
 };
+
+exports.getContributionPublic = (req, res) => {
+  const { db } = require("../../utils/admin");
+
+  const colRef = db
+    .collection("contributionPublic")
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        return res.status(200).json({
+          code: "contribution-public/empty",
+          message: "Public contribution empty."
+        });
+      }
+
+      let pageData = [];
+      snapshot.forEach(doc => {
+        pageData.push(doc.data());
+      });
+
+      return res.status(200).json(pageData);
+    })
+    .catch(err => {
+      return res.status(400).json(err);
+    });
+};

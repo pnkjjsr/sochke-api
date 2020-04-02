@@ -104,7 +104,12 @@ const {
 const { getPoll, postPoll } = require("./routes/polls");
 
 // Pages
-const { getProfile, getHome, getMinister } = require("./routes/pages");
+const {
+  getProfile,
+  getHome,
+  getMinister,
+  getContributionPublic
+} = require("./routes/pages");
 
 // Contribution
 const {
@@ -195,6 +200,7 @@ app.post("/add-poll", postPoll);
 app.post("/page-profile", getProfile);
 app.post("/page-home", getHome);
 app.post("/page-minister", getMinister);
+app.get("/page-contributionPublic", getContributionPublic);
 
 // Contributions
 app.post("/contribution", contribution);
