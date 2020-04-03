@@ -23,7 +23,15 @@ app.get("/x-contributePublic", adminRoutes.contributePublicAll);
 app.get("/x-contributePublic/:id", adminRoutes.contributePublic);
 app.post("/x-contributionPublic-add", adminRoutes.contributePublicAdd);
 app.post("/x-contributionPublic-update", adminRoutes.contributePublicUpdate);
+//** ======================================================== */
+//** ======================================================== */
 
+//** Web APIs */
+//** ======================================================== */
+const webRoutes = require("./routes");
+
+// Public Contributions
+app.post("/contributionPublic-vote", webRoutes.voteContributionPublic);
 //** ======================================================== */
 //** ======================================================== */
 
