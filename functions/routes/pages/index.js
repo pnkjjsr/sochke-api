@@ -496,6 +496,7 @@ exports.getContributionPublic = (req, res) => {
 
   const colRef = db
     .collection("contributionPublic")
+    .orderBy("createdAt", "desc")
     .get()
     .then(snapshot => {
       if (snapshot.empty) {
