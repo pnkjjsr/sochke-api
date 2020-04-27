@@ -10,13 +10,13 @@ const {
   validateRespond,
   validatePassword,
   validatePhotoData,
-  validateNameData
+  validateNameData,
 } = require("./validators");
 
 // Log user in
 exports.login = (req, res) => {
   let userData = {
-    uid: req.body.uid
+    uid: req.body.uid,
   };
   const { valid, errors } = validateLoginData(userData);
 
@@ -25,7 +25,7 @@ exports.login = (req, res) => {
   const { db } = require("../../utils/admin");
   db.doc(`/users/${userData.uid}`)
     .get()
-    .then(doc => {
+    .then((doc) => {
       if (!doc.exists) {
         return res.status(400).json(error);
       } else {
@@ -50,11 +50,11 @@ exports.login = (req, res) => {
           believerCount: data.believerCount,
           bio: data.bio,
           dateOfBirth: data.dateOfBirth,
-          gender: data.gender
+          gender: data.gender,
         });
       }
     })
-    .catch(error => {
+    .catch((error) => {
       console.log(error);
       return res.status(400).json(error);
     });
@@ -84,7 +84,7 @@ exports.signup = (req, res) => {
     country: req.body.country,
     userName: userName,
     leaderCount: 0,
-    believerCount: 0
+    believerCount: 0,
   };
 
   const { valid, errors } = validateSignupData(data);
@@ -96,22 +96,22 @@ exports.signup = (req, res) => {
     .where("area", "==", data.area)
     .where("pincode", "==", data.pincode)
     .get()
-    .then(snapshot => {
+    .then((snapshot) => {
       if (snapshot.empty) {
         data.constituency = data.area;
         return register(data.constituency);
       }
-      snapshot.forEach(doc => {
+      snapshot.forEach((doc) => {
         let cData = doc.data();
         data.constituency = cData.constituency;
         register(data.constituency);
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 
-  let register = e => {
+  let register = (e) => {
     db.doc(`/users/${data.id}`)
       .set(data)
       .then(() => {
@@ -131,10 +131,10 @@ exports.signup = (req, res) => {
           country: data.country,
           userName: userName,
           leaderCount: 0,
-          believerCount: 0
+          believerCount: 0,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   };
@@ -145,7 +145,7 @@ exports.respond = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = {
     uid: req.body.uid,
-    type: req.body.type
+    type: req.body.type,
   };
   let respond = [];
   let empty = "";
@@ -157,11 +157,11 @@ exports.respond = (req, res) => {
 
   let getDoc = queryRef
     .get()
-    .then(snapshot => {
+    .then((snapshot) => {
       if (snapshot.empty) {
         empty = "No such document!";
       }
-      snapshot.forEach(doc => {
+      snapshot.forEach((doc) => {
         respond.push(doc.data());
       });
     })
@@ -170,11 +170,11 @@ exports.respond = (req, res) => {
         return res.json(respond);
       } else {
         return res.status(404).json({
-          message: empty
+          message: empty,
         });
       }
     })
-    .catch(err => {
+    .catch((err) => {
       res.status(404).json(err);
     });
 };
@@ -187,7 +187,7 @@ exports.addRespond = (req, res) => {
     uid: req.body.uid,
     type: req.body.type,
     respond: req.body.respond,
-    imageUrl: req.body.imageUrl || ""
+    imageUrl: req.body.imageUrl || "",
   };
 
   const { valid, errors } = validateRespond(data);
@@ -199,9 +199,9 @@ exports.addRespond = (req, res) => {
   let respondsRef = db.collection("responds");
   let newRespondRef = respondsRef.doc();
   data.id = newRespondRef.id;
-  let setDoc = newRespondRef.set(data).then(ref => {
+  let setDoc = newRespondRef.set(data).then((ref) => {
     res.json({
-      message: "respond added successfully"
+      message: "respond added successfully",
     });
   });
 };
@@ -212,19 +212,19 @@ exports.getLocation = (req, res) => {
   let userRef = db.collection("users").doc(uid);
   let getDoc = userRef
     .get()
-    .then(doc => {
+    .then((doc) => {
       if (!doc.exists) {
         return res.status(400).json({
-          message: "No such document.!"
+          message: "No such document.!",
         });
       } else {
         let data = doc.data();
         return res.status(200).json(data);
       }
     })
-    .catch(error => {
+    .catch((error) => {
       res.status(400).json({
-        message: error
+        message: error,
       });
     });
 };
@@ -237,7 +237,7 @@ exports.updateLocation = (req, res) => {
     address: req.body.address,
     state: req.body.state,
     pincode: req.body.pincode,
-    country: req.body.country
+    country: req.body.country,
   };
   const { valid, errors } = validateLocationData(validationData);
 
@@ -248,19 +248,19 @@ exports.updateLocation = (req, res) => {
     address: req.body.address,
     state: req.body.state,
     pincode: req.body.pincode,
-    country: req.body.country
+    country: req.body.country,
   };
 
   db.collection("users")
     .doc(token)
     .update(data)
-    .then(function() {
+    .then(function () {
       return res.json({
         status: "done",
-        message: "Location update in user document"
+        message: "Location update in user document",
       });
     })
-    .catch(function(error) {
+    .catch(function (error) {
       return res.status(400).json(error);
     });
 };
@@ -271,7 +271,7 @@ exports.updatePhone = (req, res) => {
   const validationData = {
     token: req.body.token,
     country_code: req.body.country_code,
-    phoneNumber: req.body.phoneNumber
+    phoneNumber: req.body.phoneNumber,
   };
   const { valid, errors } = validateMobileData(validationData);
   if (!valid) return res.status(400).json(errors);
@@ -279,7 +279,7 @@ exports.updatePhone = (req, res) => {
   let token = req.body.token;
   const data = {
     countryCode: req.body.country_code,
-    phoneNumber: req.body.phoneNumber
+    phoneNumber: req.body.phoneNumber,
   };
 
   db.collection("users")
@@ -288,10 +288,10 @@ exports.updatePhone = (req, res) => {
     .then(() => {
       return res.json({
         status: "done",
-        messsage: "Phone update in user document"
+        messsage: "Phone update in user document",
       });
     })
-    .catch(function(error) {
+    .catch(function (error) {
       return res.status(400).json(error);
     });
 };
@@ -300,14 +300,14 @@ exports.verifyPhone = (req, res) => {
   const { db } = require("../../utils/admin");
   const validationData = {
     token: req.body.token,
-    phoneVerified: req.body.phoneVerified
+    phoneVerified: req.body.phoneVerified,
   };
   const { valid, errors } = validateOTPData(validationData);
   if (!valid) return res.status(400).json(errors);
 
   let token = req.body.token;
   const data = {
-    phoneVerified: req.body.phoneVerified
+    phoneVerified: req.body.phoneVerified,
   };
 
   db.collection("users")
@@ -316,10 +316,10 @@ exports.verifyPhone = (req, res) => {
     .then(() => {
       return res.json({
         status: "done",
-        messsage: "Phone verified in user document"
+        messsage: "Phone verified in user document",
       });
     })
-    .catch(function(error) {
+    .catch(function (error) {
       return res.status(400).json(error);
     });
 };
@@ -328,7 +328,7 @@ exports.verifyPassword = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = {
     uid: req.body.uid,
-    password: req.body.password
+    password: req.body.password,
   };
   const { valid, errors } = validatePassword(data);
   if (!valid) return res.status(400).json(errors);
@@ -337,12 +337,12 @@ exports.verifyPassword = (req, res) => {
   let getDoc = usersRef
     .doc(data.uid)
     .get()
-    .then(doc => {
+    .then((doc) => {
       if (!doc.exists) {
         return res.json({
           code: "user/empty",
           status: "done",
-          message: "There is no user, Signout the website."
+          message: "There is no user, Signout the website.",
         });
       } else {
         var base64 = require("base-64");
@@ -356,18 +356,18 @@ exports.verifyPassword = (req, res) => {
           res.json({
             code: "password/match",
             status: "done",
-            message: "Password matched successfully"
+            message: "Password matched successfully",
           });
         } else {
           res.json({
             code: "password/not-match",
             status: "done",
-            message: "Current password is not valid."
+            message: "Current password is not valid.",
           });
         }
       }
     })
-    .catch(error => {
+    .catch((error) => {
       return res.status(400).json(error);
     });
 };
@@ -376,21 +376,21 @@ exports.updatePassword = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = {
     id: req.body.uid,
-    password: req.body.password
+    password: req.body.password,
   };
 
   db.collection("users")
     .doc(data.id)
     .update({
-      password: data.password
+      password: data.password,
     })
     .then(() => {
       return res.status(201).json({
         code: "auth/password-update",
-        message: "User password update successfully."
+        message: "User password update successfully.",
       });
     })
-    .catch(err => {
+    .catch((err) => {
       return res.status(400).json(err);
     });
 };
@@ -400,13 +400,13 @@ exports.logout = (req, res) => {
   firebase
     .auth()
     .signOut()
-    .then(function() {
+    .then(function () {
       res.json({
         status: "done",
-        message: "Log user out."
+        message: "Log user out.",
       });
     })
-    .catch(function(error) {
+    .catch(function (error) {
       res.status(400).json(error);
     });
 };
@@ -414,24 +414,24 @@ exports.logout = (req, res) => {
 // Send Email Verification
 exports.sendEmailVerification = (req, res) => {
   firebase.initializeApp(config);
-  firebase.auth().onAuthStateChanged(function(user) {
+  firebase.auth().onAuthStateChanged(function (user) {
     if (user) {
       if (!user.emailVerified) {
         user
           .sendEmailVerification()
-          .then(function() {
+          .then(function () {
             return res.json({
               status: "done",
-              message: "Verification email sent."
+              message: "Verification email sent.",
             });
           })
-          .catch(function(error) {
+          .catch(function (error) {
             return res.status(400).json(error);
           });
       }
     } else {
       return res.status(400).json({
-        error: "Not Logged In"
+        error: "Not Logged In",
       });
     }
   });
@@ -449,7 +449,7 @@ exports.addUserDetails = (req, res) => {
     dateOfBirth: req.body.dateOfBirth,
     phoneNumber: req.body.phoneNumber,
     gender: req.body.gender,
-    searchTags: searchTagArr
+    searchTags: searchTagArr,
   };
 
   const { valid, errors } = validateUserDetails(data);
@@ -461,13 +461,13 @@ exports.addUserDetails = (req, res) => {
     .then(() => {
       return res.json({
         status: "done",
-        message: "Details added successfully"
+        message: "Details added successfully",
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       return res.status(500).json({
-        error: err.code
+        error: err.code,
       });
     });
 };
@@ -475,22 +475,22 @@ exports.addUserDetails = (req, res) => {
 exports.getUserDetails = (req, res) => {
   const { db } = require("../../utils/admin");
   let userData = {
-    uid: req.body.uid
+    uid: req.body.uid,
   };
   db.doc(`/users/${userData.uid}`)
     .get()
-    .then(doc => {
+    .then((doc) => {
       if (!doc.exists) {
         return res.status(400).json({
           code: "user/not-found",
-          message: "user not available."
+          message: "user not available.",
         });
       } else {
         let data = doc.data();
         return res.status(201).json(data);
       }
     })
-    .catch(error => {
+    .catch((error) => {
       console.log(error);
       return res.status(400).json(error);
     });
@@ -501,7 +501,7 @@ exports.getAuthenticatedUser = (req, res) => {
   let userData = {};
   db.doc(`/users/${req.user.handle}`)
     .get()
-    .then(doc => {
+    .then((doc) => {
       if (doc.exists) {
         userData.credentials = doc.data();
         return db
@@ -510,9 +510,9 @@ exports.getAuthenticatedUser = (req, res) => {
           .get();
       }
     })
-    .then(data => {
+    .then((data) => {
       userData.likes = [];
-      data.forEach(doc => {
+      data.forEach((doc) => {
         userData.likes.push(doc.data());
       });
       return db
@@ -522,9 +522,9 @@ exports.getAuthenticatedUser = (req, res) => {
         .limit(10)
         .get();
     })
-    .then(data => {
+    .then((data) => {
       userData.notifications = [];
-      data.forEach(doc => {
+      data.forEach((doc) => {
         userData.notifications.push({
           recipient: doc.data().recipient,
           sender: doc.data().sender,
@@ -532,15 +532,15 @@ exports.getAuthenticatedUser = (req, res) => {
           screamId: doc.data().screamId,
           type: doc.data().type,
           read: doc.data().read,
-          notificationId: doc.id
+          notificationId: doc.id,
         });
       });
       return res.json(userData);
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       return res.status(500).json({
-        error: err.code
+        error: err.code,
       });
     });
 };
@@ -552,7 +552,7 @@ exports.uploadImage = (req, res) => {
   const fs = require("fs");
 
   const busboy = new BusBoy({
-    headers: req.headers
+    headers: req.headers,
   });
 
   let imageToBeUploaded = {};
@@ -562,7 +562,7 @@ exports.uploadImage = (req, res) => {
     console.log(fieldname, file, filename, encoding, mimetype);
     if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
       return res.status(400).json({
-        error: "Wrong file type submitted"
+        error: "Wrong file type submitted",
       });
     }
     // my.image.png => ['my', 'image', 'png']
@@ -574,7 +574,7 @@ exports.uploadImage = (req, res) => {
     const filepath = path.join(os.tmpdir(), imageFileName);
     imageToBeUploaded = {
       filepath,
-      mimetype
+      mimetype,
     };
     file.pipe(fs.createWriteStream(filepath));
   });
@@ -587,27 +587,27 @@ exports.uploadImage = (req, res) => {
         resumable: false,
         metadata: {
           metadata: {
-            contentType: imageToBeUploaded.mimetype
-          }
-        }
+            contentType: imageToBeUploaded.mimetype,
+          },
+        },
       })
       .then(() => {
         const { db } = require("../../utils/admin");
         const config = require("../../firebaseConfig");
         const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`;
         return db.doc(`/users/${req.user.handle}`).update({
-          imageUrl
+          imageUrl,
         });
       })
       .then(() => {
         return res.json({
-          message: "image uploaded successfully"
+          message: "image uploaded successfully",
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         return res.status(500).json({
-          error: "something went wrong"
+          error: "something went wrong",
         });
       });
   });
@@ -617,22 +617,22 @@ exports.uploadImage = (req, res) => {
 exports.registeredEmail = (req, res) => {
   const { db } = require("../../utils/admin");
   let data = {
-    email: req.body.email
+    email: req.body.email,
   };
   let usersRef = db.collection("users");
   let queryRef = usersRef
     .where("email", "==", data.email)
     .get()
-    .then(snapshot => {
+    .then((snapshot) => {
       if (snapshot.empty) {
         return res.json({
           code: "email/not-register",
-          message: "Email ID not registerd."
+          message: "Email ID not registerd.",
         });
       } else {
         return res.json({
           code: "email/register",
-          message: "Email ID registerd."
+          message: "Email ID registerd.",
         });
       }
     });
@@ -641,23 +641,23 @@ exports.registeredEmail = (req, res) => {
 exports.markNotificationsRead = (req, res) => {
   const { db } = require("../../utils/admin");
   let batch = db.batch();
-  req.body.forEach(notificationId => {
+  req.body.forEach((notificationId) => {
     const notification = db.doc(`/notifications/${notificationId}`);
     batch.update(notification, {
-      read: true
+      read: true,
     });
   });
   batch
     .commit()
     .then(() => {
       return res.json({
-        message: "Notifications marked read"
+        message: "Notifications marked read",
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       return res.status(500).json({
-        error: err.code
+        error: err.code,
       });
     });
 };
@@ -667,7 +667,7 @@ exports.addUserPhoto = (req, res) => {
   const { db } = require("../../utils/admin");
   let data = {
     uid: req.body.uid,
-    photoURL: req.body.photoURL
+    photoURL: req.body.photoURL,
   };
 
   const { valid, errors } = validatePhotoData(data);
@@ -679,13 +679,13 @@ exports.addUserPhoto = (req, res) => {
     .then(() => {
       return res.json({
         status: "done",
-        message: "Details added successfully"
+        message: "Details added successfully",
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       return res.status(500).json({
-        error: err.code
+        error: err.code,
       });
     });
 };
@@ -697,7 +697,7 @@ exports.addUserName = (req, res) => {
   let data = {
     uid: req.body.uid,
     displayName: req.body.displayName,
-    searchTags: searchTagArr
+    searchTags: searchTagArr,
   };
 
   const { valid, errors } = validateNameData(data);
@@ -708,13 +708,13 @@ exports.addUserName = (req, res) => {
     .then(() => {
       return res.json({
         status: "done",
-        message: "Details added successfully"
+        message: "Details added successfully",
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       return res.status(500).json({
-        error: err.code
+        error: err.code,
       });
     });
 };
@@ -732,7 +732,7 @@ exports.believe = (req, res) => {
     leaderUserName: req.body.leaderUserName,
     leaderDisplayName: req.body.leaderDisplayName,
     leaderPhotoURL: req.body.leaderPhotoURL,
-    believe: true
+    believe: true,
   };
 
   let colRef = db.collection("connections");
@@ -740,10 +740,10 @@ exports.believe = (req, res) => {
     .where("uid", "==", data.uid)
     .where("lid", "==", data.lid);
 
-  let transaction = db.runTransaction(t => {
+  let transaction = db.runTransaction((t) => {
     return t
       .get(queryRef)
-      .then(snapshot => {
+      .then((snapshot) => {
         if (snapshot.empty) {
           let docRef = colRef.doc();
           data.id = docRef.id;
@@ -756,19 +756,19 @@ exports.believe = (req, res) => {
               return res.json({
                 status: "done",
                 code: "leader/added",
-                message: "Leader added successfully"
+                message: "Leader added successfully",
               });
             })
-            .catch(err => {
+            .catch((err) => {
               return res.status(404).json(err);
             });
         }
 
-        snapshot.forEach(doc => {
+        snapshot.forEach((doc) => {
           let docRef = doc.data().id;
           let updateData = {
             changedAt: new Date().toISOString(),
-            believe: true
+            believe: true,
           };
           colRef
             .doc(docRef)
@@ -780,7 +780,7 @@ exports.believe = (req, res) => {
               return res.json({
                 status: "done",
                 code: "leader/added",
-                message: "Leader added in believe list."
+                message: "Leader added in believe list.",
               });
             });
         });
@@ -791,7 +791,7 @@ exports.believe = (req, res) => {
           usersRef
             .doc(data.uid)
             .get()
-            .then(doc => {
+            .then((doc) => {
               let newLeaderCount = doc.data().leaderCount + 1;
               usersRef.doc(data.uid).update({ leaderCount: newLeaderCount });
             });
@@ -799,7 +799,7 @@ exports.believe = (req, res) => {
           usersRef
             .doc(data.lid)
             .get()
-            .then(doc => {
+            .then((doc) => {
               let newBelieverCount = doc.data().believerCount + 1;
               usersRef
                 .doc(data.lid)
@@ -813,8 +813,8 @@ exports.believe = (req, res) => {
           respondColRef
             .where("uid", "==", data.lid)
             .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
+            .then((snapshot) => {
+              snapshot.forEach((doc) => {
                 let respondData = doc.data();
 
                 let docRef = respondColRef
@@ -824,19 +824,19 @@ exports.believe = (req, res) => {
                   .set({
                     createdAt: new Date().toISOString(),
                     id: data.uid,
-                    rid: respondData.id
+                    rid: respondData.id,
                   })
                   .then(() => {
                     console.log("All respond update with this believer.");
                   });
               });
             })
-            .catch(err => {
+            .catch((err) => {
               console.log(err);
             });
         };
       })
-      .catch(err => {
+      .catch((err) => {
         return res.status(404).json(err);
       });
   });
@@ -847,7 +847,7 @@ exports.rethink = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = {
     lid: req.body.lid,
-    uid: req.body.uid
+    uid: req.body.uid,
   };
 
   let colRef = db.collection("connections");
@@ -855,15 +855,15 @@ exports.rethink = (req, res) => {
     .where("uid", "==", data.uid)
     .where("lid", "==", data.lid);
 
-  let transaction = db.runTransaction(t => {
+  let transaction = db.runTransaction((t) => {
     return t
       .get(querylRef)
-      .then(snapshot => {
-        snapshot.forEach(doc => {
+      .then((snapshot) => {
+        snapshot.forEach((doc) => {
           let docRef = doc.data().id;
           let updateData = {
             changedAt: new Date().toISOString(),
-            believe: false
+            believe: false,
           };
           colRef
             .doc(docRef)
@@ -874,7 +874,7 @@ exports.rethink = (req, res) => {
               return res.json({
                 status: "done",
                 code: "leader/rethink",
-                message: "Leader removed from believe list."
+                message: "Leader removed from believe list.",
               });
             });
         });
@@ -885,7 +885,7 @@ exports.rethink = (req, res) => {
           usersRef
             .doc(data.uid)
             .get()
-            .then(doc => {
+            .then((doc) => {
               let newLeaderCount = doc.data().leaderCount - 1;
               usersRef.doc(data.uid).update({ leaderCount: newLeaderCount });
             });
@@ -893,7 +893,7 @@ exports.rethink = (req, res) => {
           usersRef
             .doc(data.lid)
             .get()
-            .then(doc => {
+            .then((doc) => {
               let newBelieverCount = doc.data().believerCount - 1;
               usersRef
                 .doc(data.lid)
@@ -901,7 +901,7 @@ exports.rethink = (req, res) => {
             });
         };
       })
-      .catch(err => {
+      .catch((err) => {
         return res.status(404).json(err);
       });
   });
@@ -914,7 +914,7 @@ exports.postFeedback = (req, res) => {
     path: req.body.path,
     type: req.body.type,
     title: req.body.title,
-    describe: req.body.describe
+    describe: req.body.describe,
   };
 
   let docRef = db.collection("feedbacks").doc();
@@ -925,10 +925,33 @@ exports.postFeedback = (req, res) => {
     .then(() => {
       return res.status(201).json({
         code: "feedback/create",
-        message: "Feedback saved in databse successfully."
+        message: "Feedback saved in databse successfully.",
       });
     })
-    .catch(err => {
+    .catch((err) => {
+      return res.status(400).json(err);
+    });
+};
+
+exports.userCounterAdd = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    createdAt: new Date().toISOString(),
+    ip: req.body.ip,
+  };
+
+  let docRef = db.collection("visitors").doc();
+  data.id = docRef.id;
+
+  docRef
+    .set(data)
+    .then(() => {
+      return res.status(201).json({
+        code: "visitor/added",
+        message: "User visitor IP added in databse successfully.",
+      });
+    })
+    .catch((err) => {
       return res.status(400).json(err);
     });
 };

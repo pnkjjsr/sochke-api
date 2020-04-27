@@ -32,6 +32,7 @@ const webRoutes = require("./routes");
 
 // Public Contributions
 app.post("/contributionPublic-vote", webRoutes.voteContributionPublic);
+app.post("/userCounter-add", webRoutes.userCounterAdd);
 //** ======================================================== */
 //** ======================================================== */
 
@@ -57,7 +58,7 @@ const {
   updatePassword,
   believe,
   rethink,
-  postFeedback
+  postFeedback,
 } = require("./routes/users");
 
 // respond routes
@@ -67,7 +68,7 @@ const {
   voteRespond,
   getVoteRespond,
   opinion,
-  addOpinion
+  addOpinion,
 } = require("./routes/responds");
 
 // ministers routes
@@ -86,7 +87,7 @@ const {
   ministerVote,
   ministerVoted,
   ministerValue,
-  ministerConnection
+  ministerConnection,
 } = require("./routes/ministers");
 
 // party routes
@@ -105,7 +106,7 @@ const {
   cronConstituencies,
   cronAddMinisterPhoto,
   cronUpdateUserSearchTag,
-  cronUpdateMinisterSearchTag
+  cronUpdateMinisterSearchTag,
 } = require("./routes/crons");
 
 // Poll
@@ -116,14 +117,14 @@ const {
   getProfile,
   getHome,
   getMinister,
-  getContributionPublic
+  getContributionPublic,
 } = require("./routes/pages");
 
 // Contribution
 const {
   contribution,
   addContribution,
-  voteContribution
+  voteContribution,
 } = require("./routes/contributions");
 
 // Search
