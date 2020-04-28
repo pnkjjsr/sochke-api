@@ -33,6 +33,7 @@ const webRoutes = require("./routes");
 // Public Contributions
 app.post("/contributionPublic-vote", webRoutes.voteContributionPublic);
 app.post("/userCounter-add", webRoutes.userCounterAdd);
+app.post("/covidUser-add", webRoutes.covidUserAdd);
 //** ======================================================== */
 //** ======================================================== */
 
