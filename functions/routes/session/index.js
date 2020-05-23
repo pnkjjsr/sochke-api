@@ -2,7 +2,7 @@
 exports.postSession = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = {
-    createdAt: req.body.createdAt
+    createdAt: req.body.createdAt,
   };
 
   let colRef = db.collection("sessions");
@@ -12,31 +12,20 @@ exports.postSession = (req, res) => {
     return res.json({
       status: "done",
       code: "session/open",
-      message: "url hit by client."
+      message: "url hit by client.",
     });
   });
 };
 
-// Get all respond
+// Test for Number
 exports.test = (req, res) => {
   const { db } = require("../../utils/admin");
 
   let colRef = db
-    .collection("sessions")
+    .collection("visitors")
     .get()
-    .then(snapshot => {
-      if (snapshot.empty) {
-        return res.json({
-          status: "done",
-          code: "session/empty",
-          message: "session is empty"
-        });
-      } else {
-        res.json({
-          status: "done",
-          code: "session/data",
-          message: "so many sessions."
-        });
-      }
+    .then((snapshot) => {
+      let count = snapshot.size;
+      return res.json(count);
     });
 };

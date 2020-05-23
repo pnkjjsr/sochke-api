@@ -1,9 +1,13 @@
 // Contribution Public
 const { voteContributionPublic } = require("./contributionPublic");
 const { userCounterAdd } = require("./users");
+// Covid Map
 const { covidUserAdd } = require("./covid");
 const { covidLocationAdd } = require("./covid");
+// Subscribers
 const { subscriberAdd } = require("./subscribers");
+// Open Neta
+const { getNeta } = require("./ministers");
 
 module.exports = {
   voteContributionPublic,
@@ -11,4 +15,5 @@ module.exports = {
   covidUserAdd,
   covidLocationAdd,
   subscriberAdd,
+  getNeta,
 };

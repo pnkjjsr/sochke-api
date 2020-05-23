@@ -1,7 +1,7 @@
 exports.getHome = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = {
-    uid: req.body.uid
+    uid: req.body.uid,
   };
   let pageData = {
     leaderCount: 0,
@@ -16,16 +16,16 @@ exports.getHome = (req, res) => {
     cms: [],
     pms: [],
     polls: [],
-    currentCandidates: []
+    currentCandidates: [],
   };
 
   let colRef = db.collection("users").doc(data.uid);
 
   let transaction = db
-    .runTransaction(t => {
+    .runTransaction((t) => {
       return t
         .get(colRef)
-        .then(doc => {
+        .then((doc) => {
           let uData = doc.data();
 
           let currectElection = db
@@ -35,13 +35,13 @@ exports.getHome = (req, res) => {
             .where("constituency", "==", uData.constituency)
             .where("state", "==", "DELHI")
             .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
+            .then((snapshot) => {
+              snapshot.forEach((doc) => {
                 let cData = doc.data();
                 pageData.currentCandidates.push(cData);
               });
             })
-            .catch(err => {
+            .catch((err) => {
               console.log(err);
             });
 
@@ -51,23 +51,23 @@ exports.getHome = (req, res) => {
             .orderBy("createdAt", "desc")
             .limit(50)
             .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
+            .then((snapshot) => {
+              snapshot.forEach((doc) => {
                 let bData = doc.data();
 
                 db.collection("responds")
                   .doc(bData.rid)
                   .get()
-                  .then(doc => {
+                  .then((doc) => {
                     let rData = doc.data();
                     pageData.responds.push(rData);
                   })
-                  .catch(err => {
+                  .catch((err) => {
                     console.log(err);
                   });
               });
             })
-            .catch(err => {
+            .catch((err) => {
               console.log(err);
             });
 
@@ -77,15 +77,15 @@ exports.getHome = (req, res) => {
             .collection("responds")
             .where("uid", "==", promotedUID)
             .get()
-            .then(snapshot => {
+            .then((snapshot) => {
               let i = 0;
-              snapshot.forEach(doc => {
+              snapshot.forEach((doc) => {
                 let docData = doc.data();
                 if (!i) pageData.respondPromoted.push(docData);
                 i++;
               });
             })
-            .catch(err => {
+            .catch((err) => {
               console.log(err);
             });
 
@@ -95,15 +95,15 @@ exports.getHome = (req, res) => {
             .orderBy("createdAt", "desc")
             .limit(25)
             .get()
-            .then(snapshot => {
+            .then((snapshot) => {
               pageData.contributionCount = snapshot.size;
 
-              snapshot.forEach(async doc => {
+              snapshot.forEach(async (doc) => {
                 let snapData = doc.data();
                 pageData.contributions.push(snapData);
               });
             })
-            .catch(err => {
+            .catch((err) => {
               console.log(err);
             });
 
@@ -113,13 +113,13 @@ exports.getHome = (req, res) => {
             .where("vote", "==", true)
             .limit(50)
             .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
+            .then((snapshot) => {
+              snapshot.forEach((doc) => {
                 let voteData = doc.data();
                 pageData.respondVoted.push(voteData.rid);
               });
             })
-            .catch(err => {
+            .catch((err) => {
               console.log(err);
             });
 
@@ -129,13 +129,13 @@ exports.getHome = (req, res) => {
             .where("year", "==", 2017)
             .where("constituency", "==", uData.constituency)
             .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
+            .then((snapshot) => {
+              snapshot.forEach((doc) => {
                 let snapData = doc.data();
                 pageData.councillors.push(snapData);
               });
             })
-            .catch(err => {
+            .catch((err) => {
               console.log(err);
             });
 
@@ -145,13 +145,13 @@ exports.getHome = (req, res) => {
             .where("year", "==", 2020)
             .where("constituency", "==", uData.constituency)
             .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
+            .then((snapshot) => {
+              snapshot.forEach((doc) => {
                 let snapData = doc.data();
                 pageData.mlas.push(snapData);
               });
             })
-            .catch(err => {
+            .catch((err) => {
               console.log(err);
             });
 
@@ -161,13 +161,13 @@ exports.getHome = (req, res) => {
             .where("year", "==", 2019)
             .where("constituency", "==", uData.district)
             .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
+            .then((snapshot) => {
+              snapshot.forEach((doc) => {
                 let snapData = doc.data();
                 pageData.mps.push(snapData);
               });
             })
-            .catch(err => {
+            .catch((err) => {
               console.log(err);
             });
 
@@ -177,13 +177,13 @@ exports.getHome = (req, res) => {
             .where("year", "==", 2015)
             .where("constituency", "==", uData.state)
             .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
+            .then((snapshot) => {
+              snapshot.forEach((doc) => {
                 let snapData = doc.data();
                 pageData.cms.push(snapData);
               });
             })
-            .catch(err => {
+            .catch((err) => {
               console.log(err);
             });
 
@@ -192,13 +192,13 @@ exports.getHome = (req, res) => {
             .where("type", "==", "PM")
             .where("year", "==", 2019)
             .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
+            .then((snapshot) => {
+              snapshot.forEach((doc) => {
                 let snapData = doc.data();
                 pageData.pms.push(snapData);
               });
             })
-            .catch(err => {
+            .catch((err) => {
               console.log(err);
             });
 
@@ -208,22 +208,22 @@ exports.getHome = (req, res) => {
             .orderBy("createdAt", "desc")
             .limit(100)
             .get()
-            .then(snapshot => {
-              snapshot.forEach(doc => {
+            .then((snapshot) => {
+              snapshot.forEach((doc) => {
                 let pollData = doc.data();
                 db.collection("polls")
                   .doc(pollData.id)
                   .collection("pollVotes")
                   .doc(uData.id)
                   .get()
-                  .then(doc => {
+                  .then((doc) => {
                     if (!doc.exists) {
                       pageData.polls.push(pollData);
                     }
                   });
               });
             })
-            .catch(err => {
+            .catch((err) => {
               console.log(err);
             });
 
@@ -238,19 +238,19 @@ exports.getHome = (req, res) => {
             allMp,
             allCm,
             allPm,
-            allPoll
-          ]).catch(err => {
+            allPoll,
+          ]).catch((err) => {
             console.log(err);
           });
         })
-        .catch(err => {
+        .catch((err) => {
           return res.status(404).json(err);
         });
     })
     .then(() => {
       res.json(pageData);
     })
-    .catch(err => {
+    .catch((err) => {
       return res.status(404).json(err);
     });
 };
@@ -259,31 +259,31 @@ exports.getProfile = (req, res) => {
   const { db } = require("../../utils/admin");
   const data = {
     uid: req.body.uid,
-    userName: req.body.userName
+    userName: req.body.userName,
   };
 
   let pageData = {
     responds: [],
     contributions: [],
     believers: [],
-    leaders: []
+    leaders: [],
   };
 
   const colRef = db.collection("users").where("userName", "==", data.userName);
 
   let transaction = db
-    .runTransaction(t => {
-      return t.get(colRef).then(snapshot => {
+    .runTransaction((t) => {
+      return t.get(colRef).then((snapshot) => {
         if (snapshot.empty) {
           return res.status(200).json({
             status: "done",
             code: "profile/empty",
-            message: "no user found."
+            message: "no user found.",
           });
         }
 
         let uData;
-        snapshot.forEach(doc => {
+        snapshot.forEach((doc) => {
           uData = doc.data();
 
           pageData.id = uData.id;
@@ -302,16 +302,16 @@ exports.getProfile = (req, res) => {
           .orderBy("createdAt", "desc")
           .limit(25)
           .get()
-          .then(snapshot => {
+          .then((snapshot) => {
             let respondCount = snapshot.size;
             pageData.respondCount = respondCount;
 
-            snapshot.forEach(doc => {
+            snapshot.forEach((doc) => {
               let rData = doc.data();
               pageData.responds.push(rData);
             });
           })
-          .catch(err => {
+          .catch((err) => {
             console.log(err);
           });
 
@@ -321,13 +321,13 @@ exports.getProfile = (req, res) => {
           .orderBy("createdAt", "desc")
           .limit(25)
           .get()
-          .then(snapshot => {
-            snapshot.forEach(async doc => {
+          .then((snapshot) => {
+            snapshot.forEach(async (doc) => {
               let snapData = doc.data();
               pageData.contributions.push(snapData);
             });
           })
-          .catch(err => {
+          .catch((err) => {
             console.log(err);
           });
 
@@ -335,11 +335,11 @@ exports.getProfile = (req, res) => {
           .collection("contributions")
           .where("uid", "==", uData.id)
           .get()
-          .then(snapshot => {
+          .then((snapshot) => {
             let contributionCount = snapshot.size;
             pageData.contributionCount = contributionCount;
           })
-          .catch(err => {
+          .catch((err) => {
             console.log(err);
           });
 
@@ -348,11 +348,11 @@ exports.getProfile = (req, res) => {
           .where("uid", "==", uData.id)
           .where("type", "==", "media")
           .get()
-          .then(snapshot => {
+          .then((snapshot) => {
             let mediaCount = snapshot.size;
             pageData.mediaCount = mediaCount;
           })
-          .catch(err => {
+          .catch((err) => {
             console.log(err);
           });
 
@@ -361,13 +361,13 @@ exports.getProfile = (req, res) => {
           .where("lid", "==", uData.id)
           .where("believe", "==", true)
           .get()
-          .then(snapshot => {
-            snapshot.docs.map(doc => {
+          .then((snapshot) => {
+            snapshot.docs.map((doc) => {
               let believerData = doc.data();
               pageData.believers.push(believerData);
             });
           })
-          .catch(err => {
+          .catch((err) => {
             console.log(err);
           });
 
@@ -376,13 +376,13 @@ exports.getProfile = (req, res) => {
           .where("uid", "==", uData.id)
           .where("believe", "==", true)
           .get()
-          .then(snapshot => {
-            snapshot.forEach(doc => {
+          .then((snapshot) => {
+            snapshot.forEach((doc) => {
               let leaderData = doc.data();
               pageData.leaders.push(leaderData);
             });
           })
-          .catch(err => {
+          .catch((err) => {
             console.log(err);
           });
 
@@ -391,15 +391,15 @@ exports.getProfile = (req, res) => {
           .where("uid", "==", data.uid)
           .where("lid", "==", uData.id)
           .get()
-          .then(snapshot => {
+          .then((snapshot) => {
             if (snapshot.empty) {
               pageData.believe = false;
             }
-            snapshot.forEach(doc => {
+            snapshot.forEach((doc) => {
               pageData.believe = doc.data().believe;
             });
           })
-          .catch(err => {
+          .catch((err) => {
             console.log(err);
           });
 
@@ -410,18 +410,18 @@ exports.getProfile = (req, res) => {
           respondMediaRef,
           beliversRef,
           leadersRef,
-          believeRef
+          believeRef,
         ])
           .then(() => {
             res.json(pageData);
           })
-          .catch(err => {
+          .catch((err) => {
             console.log(err);
           });
       });
     })
 
-    .catch(err => {
+    .catch((err) => {
       console.log("Transaction failure:", err);
       res.status(404).json(err);
     });
@@ -435,7 +435,7 @@ exports.getMinister = (req, res) => {
     constituency: req.body.constituency,
     district: req.body.district,
     state: req.body.state,
-    uid: req.body.uid
+    uid: req.body.uid,
   };
 
   let colRef = db.collection("ministers");
@@ -444,23 +444,23 @@ exports.getMinister = (req, res) => {
   let pageData = {
     winnerMinister: {},
     ministers: [],
-    voted: false
+    voted: false,
   };
 
   let transaction = db
-    .runTransaction(t => {
-      return t.get(queryRef).then(snapshot => {
+    .runTransaction((t) => {
+      return t.get(queryRef).then((snapshot) => {
         let mData = {};
 
         if (snapshot.empty) {
           pageData = {
             status: "done",
             code: "minister/empty",
-            message: "No minister with this name."
+            message: "No minister with this name.",
           };
         }
 
-        snapshot.forEach(doc => {
+        snapshot.forEach((doc) => {
           mData = doc.data();
           pageData.winnerMinister = doc.data();
         });
@@ -471,12 +471,12 @@ exports.getMinister = (req, res) => {
           .where("year", "==", mData.year)
           // .where("state", "==", data.state)
           .get()
-          .then(snapshot => {
-            snapshot.forEach(doc => {
+          .then((snapshot) => {
+            snapshot.forEach((doc) => {
               pageData.ministers.push(doc.data());
             });
           })
-          .catch(err => {
+          .catch((err) => {
             console.log(err);
           });
 
@@ -486,7 +486,7 @@ exports.getMinister = (req, res) => {
     .then(() => {
       return res.status(200).json(pageData);
     })
-    .catch(err => {
+    .catch((err) => {
       res.status(404).json(err);
     });
 };
@@ -498,22 +498,22 @@ exports.getContributionPublic = (req, res) => {
     .collection("contributionPublic")
     .orderBy("createdAt", "desc")
     .get()
-    .then(snapshot => {
+    .then((snapshot) => {
       if (snapshot.empty) {
         return res.status(200).json({
           code: "contribution-public/empty",
-          message: "Public contribution empty."
+          message: "Public contribution empty.",
         });
       }
 
       let pageData = [];
-      snapshot.forEach(doc => {
+      snapshot.forEach((doc) => {
         pageData.push(doc.data());
       });
 
       return res.status(200).json(pageData);
     })
-    .catch(err => {
+    .catch((err) => {
       return res.status(400).json(err);
     });
 };
