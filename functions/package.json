@@ -22,7 +22,7 @@
     "importDatabase": "gcloud firestore import gs://sochke-dev.appspot.com/2020-01-28T08:46:19_65928/"
   },
   "engines": {
-    "node": "8"
+    "node": "12"
   },
   "dependencies": {
     "base-64": "^0.1.0",
