@@ -613,16 +613,12 @@ exports.ministerConnection = (req, res) => {
 
 exports.getNeta = (req, res) => {
   const { db } = require("../../utils/admin");
-  const data = {
-    query: req.query.neta,
-  };
-  let string = data.query.replace(/-/g, " ");
 
   let ministerData = {};
   let empty = false;
   let colRef = db
     .collection("ministers")
-    .where("searchTags", "array-contains", string);
+    .where("searchTags", "array-contains", "narendra modi");
 
   let transaction = db
     .runTransaction((t) => {
@@ -655,4 +651,16 @@ exports.getNeta = (req, res) => {
     .catch((err) => {
       return res.status(404).json(err);
     });
+};
+
+exports.postNeta = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    createdAt: req.body.createdAt,
+    mid: req.body.mid,
+    uip: req.body.userIP,
+    vote: req.body.vote,
+  };
+
+  return res.json(data);
 };

@@ -38,7 +38,8 @@ app.post("/covidLocation-add", webRoutes.covidLocationAdd);
 app.post("/subscriber-add", webRoutes.subscriberAdd);
 
 // Open neta API
-app.get("/getNeta", webRoutes.getNeta);
+app.get("/neta", webRoutes.getNeta);
+app.post("/neta", webRoutes.postNeta);
 
 //** ======================================================== */
 //** ======================================================== */

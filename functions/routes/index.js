@@ -8,6 +8,7 @@ const { covidLocationAdd } = require("./covid");
 const { subscriberAdd } = require("./subscribers");
 // Open Neta
 const { getNeta } = require("./ministers");
+const { postNeta } = require("./ministers");
 
 module.exports = {
   voteContributionPublic,
@@ -16,4 +17,5 @@ module.exports = {
   covidLocationAdd,
   subscriberAdd,
   getNeta,
+  postNeta,
 };
