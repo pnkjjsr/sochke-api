@@ -658,9 +658,49 @@ exports.postNeta = (req, res) => {
   const data = {
     createdAt: req.body.createdAt,
     mid: req.body.mid,
-    uip: req.body.userIP,
+    uid: req.body.uid,
     vote: req.body.vote,
   };
 
-  return res.json(data);
+  let colRef = db.collection("ministers").doc(data.mid);
+
+  let transaction = db
+    .runTransaction((t) => {
+      return t
+        .get(colRef)
+        .then((doc) => {
+          let mData = doc.data();
+
+          colRef
+            .collection("ministerVotes")
+            .doc(data.uid)
+            .set(data)
+            .then(() => {
+              console.log(`vote saved`);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+
+          if (data.vote === "true")
+            colRef.update({ voteTrueCount: mData.voteTrueCount + 1 });
+          if (data.vote === "false")
+            colRef.update({ voteFalseCount: mData.voteFalseCount + 1 });
+          if (data.vote === "pass")
+            colRef.update({ votePassCount: mData.votePassCount + 1 });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    })
+    .then(() => {
+      return res.json({
+        code: "minister/vote",
+        status: "done",
+        message: "Vote added in minister name.",
+      });
+    })
+    .catch((err) => {
+      return res.status(400).json(err);
+    });
 };
