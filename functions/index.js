@@ -40,6 +40,7 @@ app.post("/subscriber-add", webRoutes.subscriberAdd);
 // Open neta API
 app.get("/neta", webRoutes.getNeta);
 app.post("/neta", webRoutes.postNeta);
+app.post("/neta-like", webRoutes.postNetaLike);
 
 //** ======================================================== */
 //** ======================================================== */

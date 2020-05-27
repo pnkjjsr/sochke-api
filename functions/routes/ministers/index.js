@@ -704,3 +704,52 @@ exports.postNeta = (req, res) => {
       return res.status(400).json(err);
     });
 };
+
+exports.postNetaLike = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    createdAt: req.body.createdAt,
+    mid: req.body.mid,
+    uid: req.body.uid,
+    like: req.body.like,
+  };
+
+  let colRef = db.collection("ministers").doc(data.mid);
+
+  let transaction = db
+    .runTransaction((t) => {
+      return t
+        .get(colRef)
+        .then((doc) => {
+          let mData = doc.data();
+
+          colRef
+            .collection("ministerLikes")
+            .doc(data.uid)
+            .set(data)
+            .then(() => {
+              console.log(`vote saved`);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+
+          if (data.like === true)
+            colRef.update({ likeCount: mData.likeCount + 1 });
+          else colRef.update({ likeCount: mData.likeCount - 1 });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    })
+    .then(() => {
+      return res.json({
+        code: "minister/like",
+        status: "done",
+        message: "Like added in minister name.",
+      });
+    })
+    .catch((err) => {
+      return res.status(400).json(err);
+    });
+};
