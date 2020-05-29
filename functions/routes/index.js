@@ -10,6 +10,7 @@ const { subscriberAdd } = require("./subscribers");
 const { getNeta } = require("./ministers");
 const { postNeta } = require("./ministers");
 const { postNetaLike } = require("./ministers");
+const { postNetaShare } = require("./ministers");
 
 module.exports = {
   voteContributionPublic,
@@ -20,4 +21,5 @@ module.exports = {
   getNeta,
   postNeta,
   postNetaLike,
+  postNetaShare,
 };

@@ -753,3 +753,51 @@ exports.postNetaLike = (req, res) => {
       return res.status(400).json(err);
     });
 };
+
+exports.postNetaShare = (req, res) => {
+  const { db } = require("../../utils/admin");
+
+  const data = {
+    createdAt: req.body.createdAt,
+    mid: req.body.mid,
+    uid: req.body.uid,
+    type: req.body.type,
+  };
+
+  let colRef = db.collection("ministers").doc(data.mid);
+
+  let transaction = db
+    .runTransaction((t) => {
+      return t
+        .get(colRef)
+        .then((doc) => {
+          let mData = doc.data();
+
+          colRef
+            .collection("ministerShares")
+            .doc(data.uid)
+            .set(data)
+            .then(() => {
+              console.log(`vote saved`);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+
+          colRef.update({ shareCount: mData.shareCount + 1 });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    })
+    .then(() => {
+      return res.json({
+        code: "minister/like",
+        status: "done",
+        message: "Like added in minister name.",
+      });
+    })
+    .catch((err) => {
+      return res.status(400).json(err);
+    });
+};

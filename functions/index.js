@@ -41,6 +41,7 @@ app.post("/subscriber-add", webRoutes.subscriberAdd);
 app.get("/neta", webRoutes.getNeta);
 app.post("/neta", webRoutes.postNeta);
 app.post("/neta-like", webRoutes.postNetaLike);
+app.post("/neta-share", webRoutes.postNetaShare);
 
 //** ======================================================== */
 //** ======================================================== */
