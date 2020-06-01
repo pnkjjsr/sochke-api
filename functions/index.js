@@ -43,6 +43,7 @@ app.post("/neta", webRoutes.postNeta);
 app.post("/neta-like", webRoutes.postNetaLike);
 app.post("/neta-share", webRoutes.postNetaShare);
 app.post("/neta-comment", webRoutes.postNetaComment);
+app.get("/neta-comment", webRoutes.getNetaComment);
 
 //** ======================================================== */
 //** ======================================================== */
