@@ -809,6 +809,7 @@ exports.postNetaComment = (req, res) => {
     mid: req.body.mid,
     uid: req.body.uid,
     email: req.body.email,
+    displayName: req.body.displayName,
     comment: req.body.comment,
   };
 
@@ -820,10 +821,10 @@ exports.postNetaComment = (req, res) => {
         .get(colRef)
         .then((doc) => {
           let mData = doc.data();
+          let docRef = colRef.collection("ministerComments").doc();
+          data.id = docRef.id;
 
-          colRef
-            .collection("ministerComments")
-            .doc(data.uid)
+          docRef
             .set(data)
             .then(() => {
               console.log(`Comment saved`);
