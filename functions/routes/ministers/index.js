@@ -778,7 +778,7 @@ exports.postNetaShare = (req, res) => {
             .doc(data.uid)
             .set(data)
             .then(() => {
-              console.log(`vote saved`);
+              console.log(`Share saved`);
             })
             .catch((err) => {
               console.log(err);
@@ -792,9 +792,57 @@ exports.postNetaShare = (req, res) => {
     })
     .then(() => {
       return res.json({
-        code: "minister/like",
+        code: "minister/share",
         status: "done",
         message: "Like added in minister name.",
+      });
+    })
+    .catch((err) => {
+      return res.status(400).json(err);
+    });
+};
+
+exports.postNetaComment = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    createdAt: req.body.createdAt,
+    mid: req.body.mid,
+    uid: req.body.uid,
+    email: req.body.email,
+    comment: req.body.comment,
+  };
+
+  let colRef = db.collection("ministers").doc(data.mid);
+
+  let transaction = db
+    .runTransaction((t) => {
+      return t
+        .get(colRef)
+        .then((doc) => {
+          let mData = doc.data();
+
+          colRef
+            .collection("ministerComments")
+            .doc(data.uid)
+            .set(data)
+            .then(() => {
+              console.log(`Comment saved`);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+
+          colRef.update({ commentCount: mData.commentCount + 1 });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    })
+    .then(() => {
+      return res.json({
+        code: "minister/comment",
+        status: "done",
+        message: "Comment added in minister name.",
       });
     })
     .catch((err) => {
