@@ -809,6 +809,7 @@ exports.postNetaComment = (req, res) => {
     mid: req.body.mid,
     uid: req.body.uid,
     email: req.body.email,
+    displayName: req.body.displayName,
     comment: req.body.comment,
   };
 
@@ -820,10 +821,10 @@ exports.postNetaComment = (req, res) => {
         .get(colRef)
         .then((doc) => {
           let mData = doc.data();
+          let docRef = colRef.collection("ministerComments").doc();
+          data.id = docRef.id;
 
-          colRef
-            .collection("ministerComments")
-            .doc(data.uid)
+          docRef
             .set(data)
             .then(() => {
               console.log(`Comment saved`);
@@ -847,5 +848,43 @@ exports.postNetaComment = (req, res) => {
     })
     .catch((err) => {
       return res.status(400).json(err);
+    });
+};
+
+exports.getNetaComment = (req, res) => {
+  const { db } = require("../../utils/admin");
+  const data = {
+    id: req.query.id,
+  };
+
+  let apiData = [];
+  let colRef = db
+    .collection("ministers")
+    .doc(data.id)
+    .collection("ministerComments")
+    .orderBy("createdAt", "desc")
+    .limit(20);
+
+  let transaction = db
+    .runTransaction((t) => {
+      return t
+        .get(colRef)
+        .then((snapshot) => {
+          snapshot.forEach((doc) => {
+            let cData = doc.data();
+            apiData.push(cData);
+          });
+
+          return apiData;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    })
+    .then(() => {
+      return res.status(200).json(apiData);
+    })
+    .catch((err) => {
+      return res.json(err);
     });
 };
