@@ -695,8 +695,7 @@ exports.postNeta = (req, res) => {
     })
     .then(() => {
       return res.json({
-        code: "minister/vote",
-        status: "done",
+        code: "minister/vote-added",
         message: "Vote added in minister name.",
       });
     })
